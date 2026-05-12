@@ -313,7 +313,7 @@ function renderInc(incs){
     return "<div class='ini"+(res?" res":"")+"'>"+
       "<span>"+(res?"✅":"🔴")+"</span>"+
       "<div class='iinfo'><div class='iname'>"+esc(inc.monitor_name)+"</div><div class='itime'>"+new Date(inc.started_at.indexOf('T')<0?inc.started_at.replace(' ','T')+'Z':inc.started_at).toLocaleString("th-TH")+" · "+dur+"</div></div>"+
-      "<span class='ipill "+(res?"res":"open")+"'>"+(res?"Resolved":"Ongoing")+"</span>"+
+      "<span class='ipill "+(res?"res":"open")+"'>"+(res?"Up":"Down")+"</span>"+
     "</div>";
   }).join("");
 }
