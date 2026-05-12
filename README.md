@@ -19,14 +19,17 @@ Network uptime monitoring system built with Node.js + SQLite + Socket.IO
 ### Public Status Page
 ![Public Page](screenshots/public-page.png)
 
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
 ### Add Monitor
 ![Add Monitor](screenshots/add-monitor.png)
 
 ### Telegram Notifications
 ![Telegram](screenshots/telegram.png)
 
-### Telegram Settings
-![Telegram Settings](screenshots/telegram-settings.png)
+### Monitors
+![Monitors](screenshots/monitor.png)
 
 ### Import / Export
 ![Import Export](screenshots/import-export.png)
