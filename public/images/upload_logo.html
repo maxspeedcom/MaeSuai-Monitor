@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><title>Upload Logo</title></head>
+<body style="background:#000;color:#fff;font-family:sans-serif;padding:2rem;text-align:center">
+<h2>อัปโหลด Logo</h2>
+<input type="file" id="f" accept="image/*"><br><br>
+<button onclick="up()" style="padding:.5rem 2rem;background:#38bdf8;border:none;border-radius:8px;font-size:1rem;cursor:pointer">แปลง Base64</button>
+<br><br>
+<p>ขนาดไฟล์: <span id="sz">-</span></p>
+<textarea id="out" rows="3" style="width:90%;background:#111;color:#0f0;font-size:.7rem;" readonly placeholder="Base64 จะแสดงที่นี่..."></textarea>
+<br><br>
+<button onclick="save()" style="padding:.5rem 2rem;background:#10b981;border:none;border-radius:8px;font-size:1rem;cursor:pointer">💾 บันทึก Logo</button>
+<p id="msg"></p>
+<script>
+let b64data = '';
+function up(){
+  const f=document.getElementById('f').files[0];
+  if(!f)return alert('เลือกไฟล์ก่อน');
+  document.getElementById('sz').textContent = (f.size/1024).toFixed(1)+' KB';
+  const r=new FileReader();
+  r.onload=e=>{
+    b64data=e.target.result.split(',')[1];
+    document.getElementById('out').value=b64data.substring(0,100)+'... ('+b64data.length+' chars)';
+  };
+  r.readAsDataURL(f);
+}
+async function save(){
+  if(!b64data)return alert('แปลง Base64 ก่อน');
+  const res = await fetch('/api/upload-logo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:b64data})});
+  const d = await res.json();
+  document.getElementById('msg').textContent = d.ok ? '✅ บันทึกสำเร็จ! รีเฟรชหน้าหลักได้เลย' : '❌ '+d.error;
+}
+</script>
+</body>
+</html>

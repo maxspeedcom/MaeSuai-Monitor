@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin - MaeSuai Cloud Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="/socket.io/socket.io.js"></script>
+<style>
+:root{--bg:#030712;--bg2:#080f1e;--bg3:#0d1627;--card:rgba(13,22,39,.9);--border:rgba(148,163,184,.08);--border2:rgba(56,189,248,.28);--sky:#38bdf8;--sky2:#0ea5e9;--em:#34d399;--rose:#fb7185;--ro2:#f43f5e;--amber:#fbbf24;--tx:#f1f5f9;--tx2:#94a3b8;--tx3:#475569;--r:12px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+.lw{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;}
+.lb{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:2.5rem;width:100%;max-width:380px;}
+.ll{text-align:center;margin-bottom:2rem;}
+.ll .ico{font-size:2.5rem;display:block;margin-bottom:.5rem;}
+.ll h2{font-size:1.2rem;font-weight:700;}
+.ll p{font-size:.75rem;color:var(--tx3);margin-top:.25rem;}
+.fg{margin-bottom:1.1rem;}
+.fg label{display:block;font-size:.72rem;color:var(--tx2);margin-bottom:.35rem;letter-spacing:.06em;text-transform:uppercase;}
+.fg input,.fg select{width:100%;padding:.7rem .9rem;background:rgba(3,7,18,.8);border:1px solid rgba(56,189,248,.18);border-radius:9px;color:var(--tx);font-family:'Kanit',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;}
+.fg input:focus,.fg select:focus{border-color:var(--sky);}
+.fg select option{background:var(--bg3);}
+.btn{padding:.65rem 1.2rem;border:none;border-radius:9px;font-family:'Kanit',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.bp{background:linear-gradient(135deg,var(--sky2),var(--sky));color:#000;}
+.bp:hover{opacity:.9;}
+.bo{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.22);color:var(--sky);}
+.bo:hover{background:rgba(56,189,248,.12);}
+.bd{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.25);color:var(--rose);}
+.bs{padding:.35rem .85rem;font-size:.78rem;}
+.bf{width:100%;}
+.err{color:var(--rose);font-size:.78rem;text-align:center;margin-top:.6rem;}
+.app{display:none;height:100vh;overflow:hidden;}
+.app.on{display:flex;}
+.sb{width:232px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.sbl{padding:1.25rem 1.25rem 1rem;border-bottom:1px solid var(--border);}
+.sbl strong{display:block;font-size:.88rem;font-weight:700;color:var(--sky);}
+.sbl span{font-size:.65rem;color:var(--tx3);}
+nav{flex:1;padding:.5rem 0;}
+.ni{display:flex;align-items:center;gap:.65rem;padding:.7rem 1.25rem;color:var(--tx2);font-size:.85rem;cursor:pointer;transition:all .18s;border-left:3px solid transparent;}
+.ni:hover{color:var(--tx);background:rgba(56,189,248,.04);}
+.ni.on{color:var(--sky);background:rgba(56,189,248,.07);border-left-color:var(--sky);}
+.ni .ic{width:18px;text-align:center;}
+.sbf{padding:1rem 1.25rem;border-top:1px solid var(--border);}
+.sbu{font-size:.75rem;color:var(--tx3);margin-bottom:.6rem;}
+.sbu strong{color:var(--tx2);}
+.blo{width:100%;padding:.4rem;border-radius:8px;font-size:.78rem;background:none;border:1px solid var(--border);color:var(--tx3);cursor:pointer;font-family:'Kanit',sans-serif;transition:all .2s;}
+.blo:hover{border-color:var(--rose);color:var(--rose);}
+.main{flex:1;overflow-y:auto;padding:1.75rem;}
+.pg{display:none;}.pg.on{display:block;}
+.pgh{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.pgh h2{font-size:1.25rem;font-weight:700;}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.5rem;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;}
+.sc .sl{font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.4rem;}
+.sc .sv{font-size:1.9rem;font-weight:600;}
+.sv.sky{color:var(--sky);}.sv.em{color:var(--em);}.sv.rose{color:var(--rose);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.25rem;}
+.card h3{font-size:.85rem;font-weight:600;color:var(--tx2);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.08em;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:.65rem .9rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);border-bottom:1px solid var(--border);}
+td{padding:.8rem .9rem;font-size:.86rem;border-bottom:1px solid rgba(148,163,184,.05);vertical-align:middle;}
+tr:hover td{background:rgba(56,189,248,.02);}
+.chip{display:inline-block;font-size:.62rem;padding:.1rem .45rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.18);border-radius:4px;color:var(--sky);}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.4rem;}
+.dot.up{background:var(--em);box-shadow:0 0 5px var(--em);}
+.dot.dn{background:var(--rose);box-shadow:0 0 5px var(--rose);}
+.dot.uk{background:var(--tx3);}
+.acts{display:flex;gap:.4rem;flex-wrap:wrap;}
+.tabs{display:flex;gap:.2rem;background:rgba(3,7,18,.5);border-radius:9px;padding:.2rem;border:1px solid var(--border);margin-bottom:1.25rem;width:fit-content;}
+.tab{padding:.4rem 1rem;border-radius:7px;border:none;background:none;color:var(--tx2);font-family:'Kanit',sans-serif;font-size:.82rem;cursor:pointer;transition:all .18s;}
+.tab.on{background:rgba(56,189,248,.12);color:var(--sky);}
+.hide{display:none!important;}
+.ov{position:fixed;inset:0;z-index:200;background:rgba(3,7,18,.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;visibility:hidden;transition:all .22s;}
+.ov.on{opacity:1;visibility:visible;}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:18px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;transform:scale(.96);transition:transform .22s;}
+.ov.on .modal{transform:scale(1);}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);}
+.mh h3{font-size:1rem;font-weight:700;}
+.mc{background:none;border:none;color:var(--tx3);font-size:1.3rem;cursor:pointer;}
+.mb{padding:1.4rem;}
+.mf{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.6rem;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.ico-pick{font-size:1.5rem;padding:.3rem;border-radius:8px;cursor:pointer;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.15);transition:all .18s;}
+.ico-pick:hover{background:rgba(56,189,248,.2);transform:scale(1.1);}
+.ico-pick.sel{background:rgba(56,189,248,.25);border-color:var(--sky);}
+</style>
+</head>
+<body>
+<div class="lw" id="lw">
+  <div class="lb">
+    <div class="ll"><span class="ico">⬡</span><h2>MaeSuai Cloud Monitor</h2><p>Admin Dashboard</p></div>
+    <div class="fg"><label>Username</label><input id="lu" value="admin"></div>
+    <div class="fg"><label>Password</label><input id="lp" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="btn bp bf" onclick="login()">Login</button>
+    <div class="err" id="le"></div>
+    <p style="text-align:center;margin-top:1rem;font-size:.78rem;color:var(--tx3)"><a href="/" style="color:var(--sky)">← Back to Public Page</a></p>
+  </div>
+</div>
+<div class="app" id="app">
+  <aside class="sb">
+    <div class="sbl"><strong>⬡ MaeSuai Monitor</strong><span>Admin Dashboard</span></div>
+    <nav>
+      <div class="ni on" onclick="goP('dash',this)"><span class="ic">📊</span>Dashboard</div>
+      <div class="ni" onclick="goP('mon',this)"><span class="ic">📡</span>Monitors</div>
+      <div class="ni" onclick="goP('inc',this)"><span class="ic">⚠️</span>Incidents</div>
+      <div class="ni" onclick="goP('set',this)"><span class="ic">⚙️</span>Settings</div>
+      <div class="ni" onclick="goP('tg',this)"><span class="ic">📨</span>Telegram</div>
+      <div class="ni" onclick="goP('impexp',this)"><span class="ic">📋</span>Import/Export</div>
+      <div class="ni" onclick="window.open('/','_blank')"><span class="ic">🌐</span>Public Page</div>
+    </nav>
+    <div class="sbf">
+      <div class="sbu">Login: <strong id="un">—</strong></div>
+      <button class="blo" onclick="logout()">🔓 Logout</button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="pg on" id="pgdash">
+      <div class="pgh"><h2>📊 Dashboard</h2><button class="btn bo bs" onclick="ref()">↻ Refresh</button></div>
+      <div class="sg">
+        <div class="sc"><div class="sl">Total</div><div class="sv sky" id="sT">—</div></div>
+        <div class="sc"><div class="sl">Online</div><div class="sv em" id="sU">—</div></div>
+        <div class="sc"><div class="sl">Offline</div><div class="sv rose" id="sD">—</div></div>
+        <div class="sc"><div class="sl">Uptime 24h</div><div class="sv sky" id="sA">—</div></div>
+      </div>
+      <div class="card"><h3>Service Status</h3>
+        <table><thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Latency</th><th>Uptime 24h</th><th>Last Check</th></tr></thead>
+        <tbody id="dtbl"></tbody></table>
+      </div>
+    </div>
+    <div class="pg" id="pgmon">
+      <div class="pgh"><h2>📡 Monitors</h2><button class="btn bp bs" onclick="openAdd(event)">+ Add</button></div>
+      <div class="card"><table><thead><tr><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Interval</th><th>Public</th><th>Actions</th></tr></thead>
+        <tbody id="mtbl"></tbody></table>
+      </div>
+    </div>
+    <div class="pg" id="pginc">
+      <div class="pgh"><h2>⚠️ Incidents</h2></div>
+      <div class="card"><table><thead><tr><th>บริการ</th><th>Started</th><th>Ended</th><th>Duration</th><th>Status</th></tr></thead>
+        <tbody id="itbl"></tbody></table>
+      </div>
+    </div>
+    <div class="pg" id="pgset">
+      <div class="pgh"><h2>⚙️ Settings</h2></div>
+      <div class="tabs"><button class="tab on" onclick="swT('tg2',this)">General</button><button class="tab" onclick="swT('ts',this)">Password</button></div>
+      <div id="tg2">
+        <div class="card"><h3>Configuration</h3>
+          <div class="fg"><label>Nameเว็บไซต์</label><input id="stT"></div>
+          <div class="fg"><label>Retention (days)</label><input type="number" id="stD" min="7" max="365"></div>
+          <div class="fg"><label>Timezone</label><select id="stZ"><option value="Asia/Bangkok">Asia/Bangkok (UTC+7)</option><option value="UTC">UTC</option></select></div>
+          <button class="btn bp bs" onclick="saveSt()">💾 Save</button>
+        </div>
+      </div>
+      <div id="ts" class="hide">
+        <div class="card"><h3>ChangePassword</h3>
+          <div class="fg"><label>Passwordปัจจุบัน</label><input type="password" id="pc"></div>
+          <div class="fg"><label>Passwordใหม่</label><input type="password" id="pn"></div>
+          <div class="fg"><label>Confirm</label><input type="password" id="pk"></div>
+          <button class="btn bp bs" onclick="chPw()">🔐 Change</button>
+          <div id="pm" style="margin-top:.6rem;font-size:.82rem;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="pg" id="pgtg">
+      <div class="pgh"><h2>📨 Telegram</h2></div>
+      <div class="card">
+        <div style="background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.15);border-radius:10px;padding:1rem;margin-bottom:1.25rem;font-size:.85rem;line-height:1.8;color:var(--tx2)">
+          1. เInactive Telegram ค้นหา @BotFather<br>
+          2. พิมพ์ /newbot ตั้งName Bot<br>
+          3. คัดลอก Bot Token ใส่ด้านล่าง<br>
+          4. เพิ่ม Bot เข้า Group หา Chat ID ด้วย @userinfobot
+        </div>
+        <div class="fg"><label>Enable</label><select id="tgEn"><option value="1">เInactive</option><option value="0">Inactive</option></select></div>
+        <div class="fg"><label>Bot Token</label><input id="tgTok" placeholder="1234567890:ABCdef..."></div>
+        <div class="fg"><label>Chat ID</label><input id="tgCid" placeholder="-1001234567890"></div>
+        <div class="fg"><label>Notify on Down</label><select id="tgDn"><option value="1">แจ้ง</option><option value="0">ไม่แจ้ง</option></select></div>
+        <div class="fg"><label>Notify on Recovery</label><select id="tgRc"><option value="1">แจ้ง</option><option value="0">ไม่แจ้ง</option></select></div>
+        <div style="display:flex;gap:.75rem;">
+          <button class="btn bp bs" onclick="saveTg()">💾 Save</button>
+          <button class="btn bo bs" onclick="testTg()">📨 Test</button>
+        </div>
+        <div id="tgMsg" style="margin-top:.75rem;font-size:.85rem;"></div>
+      </div>
+    </div>
+    <div class="pg" id="pgImpexp">
+      <div class="pgh"><h2>📋 Import / Export</h2></div>
+      <div class="card" style="margin-bottom:1.25rem;">
+        <h3>📥 Export Monitors</h3>
+        <p style="font-size:.82rem;color:var(--tx2);margin-bottom:1rem;">Export items Monitor Totalเป็นไฟล์สำรอง</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+          <button class="btn bp bs" onclick="adminExportJSON()">📄 Export JSON</button>
+          <button class="btn bp bs" onclick="adminExportCSV()">📊 Export CSV</button>
+          <button class="btn bo bs" onclick="adminExportHTML()">🌐 HTML Report</button>
+          <button class="btn bo bs" onclick="adminPrint()">🖨️ Print</button>
+        </div>
+        <div id="expMsg" style="margin-top:.75rem;font-size:.82rem;min-height:1.2rem;"></div>
+      </div>
+      <div class="card">
+        <h3>📤 Import Monitors</h3>
+        <p style="font-size:.82rem;color:var(--tx2);margin-bottom:1rem;">Import from JSON file (adds to existing, does not delete)</p>
+        <div onclick="document.getElementById('adminImpFile').click()"
+          style="border:2px dashed rgba(56,189,248,.3);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;margin-bottom:1rem;"
+          onmouseover="this.style.borderColor='rgba(56,189,248,.6)'"
+          onmouseout="this.style.borderColor='rgba(56,189,248,.3)'">
+          <div style="font-size:2.5rem;margin-bottom:.5rem;">📂</div>
+          <div style="font-size:.88rem;color:var(--tx2);">Click to select JSON file</div>
+          <input type="file" id="adminImpFile" accept=".json" style="display:none" onchange="adminPreviewImport(this)">
+        </div>
+        <div id="impPreview" style="display:none;">
+          <div style="background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+            <div style="font-size:.82rem;color:var(--tx2);margin-bottom:.75rem;font-weight:600;">Preview data to import:</div>
+            <table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Active</th></tr></thead>
+            <tbody id="impPreviewBody"></tbody></table>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+            <button class="btn bp bs" onclick="adminDoImport()">Import Total</button>
+            <button class="btn bo bs" onclick="cancelImport()">Cancel</button>
+            <span id="impCount" style="font-size:.82rem;color:var(--sky);"></span>
+          </div>
+        </div>
+        <div id="impResult" style="font-size:.85rem;min-height:1.2rem;margin-top:.75rem;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ov" id="mov">
+  <div class="modal">
+    <div class="mh"><h3 id="mt">Add Monitor</h3><button class="mc" onclick="closeMon()">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="mid">
+      <div class="fg"><label>Nameบริการ *</label><input id="mn" placeholder="Web Server..."></div>
+      <div class="fg"><label>Device Icon</label>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;">
+          <div id="micoPreview" style="width:48px;height:48px;background:rgba(56,189,248,.1);border:2px solid rgba(56,189,248,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;">🖥️</div>
+          <input id="mico" style="flex:1;font-size:1.1rem;text-align:center;padding:.5rem;border-radius:9px;" placeholder="🖥️" oninput="document.getElementById('micoPreview').textContent=this.value||'🖥️'">
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem;">
+          <span onclick="pickIco(this,'🖥️')" class="ico-pick" title="Server">🖥️</span>
+          <span onclick="pickIco(this,'🗄️')" class="ico-pick" title="Rack">🗄️</span>
+          <span onclick="pickIco(this,'💻')" class="ico-pick" title="PC">💻</span>
+          <span onclick="pickIco(this,'🔀')" class="ico-pick" title="Switch">🔀</span>
+          <span onclick="pickIco(this,'🛡️')" class="ico-pick" title="Firewall">🛡️</span>
+          <span onclick="pickIco(this,'📡')" class="ico-pick" title="AP">📡</span>
+          <span onclick="pickIco(this,'📶')" class="ico-pick" title="WiFi">📶</span>
+          <span onclick="pickIco(this,'🔌')" class="ico-pick" title="Router">🔌</span>
+          <span onclick="pickIco(this,'🌐')" class="ico-pick" title="Internet">🌐</span>
+          <span onclick="pickIco(this,'☁️')" class="ico-pick" title="Cloud">☁️</span>
+          <span onclick="pickIco(this,'🔒')" class="ico-pick" title="Security">🔒</span>
+          <span onclick="pickIco(this,'💾')" class="ico-pick" title="Storage">💾</span>
+          <span onclick="pickIco(this,'🗃️')" class="ico-pick" title="Database">🗃️</span>
+          <span onclick="pickIco(this,'⚡')" class="ico-pick" title="Power">⚡</span>
+          <span onclick="pickIco(this,'📷')" class="ico-pick" title="Camera">📷</span>
+          <span onclick="pickIco(this,'📱')" class="ico-pick" title="Mobile">📱</span>
+          <span onclick="pickIco(this,'🚀')" class="ico-pick" title="VPS">🚀</span>
+          <span onclick="pickIco(this,'🌍')" class="ico-pick" title="Global">🌍</span>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Type *</label><select id="mty" onchange="tyC()"><option value="http">HTTP</option><option value="https">HTTPS</option><option value="ping">PING</option><option value="tcp">TCP Port</option></select></div>
+        <div class="fg" id="pfg" style="display:none"><label>Port</label><input type="number" id="mpo" placeholder="80"></div>
+      </div>
+      <div class="fg"><label>Target *</label><input id="mta" placeholder="https://example.com"></div>
+      <div class="fr">
+        <div class="fg"><label>Check every (sec)</label><input type="number" id="mit" value="60" min="30"></div>
+        <div class="fg"><label>Timeout (sec)</label><input type="number" id="mto2" value="10" min="3"></div>
+      </div>
+      <div class="fg" id="sfg"><label>Expected HTTP Status</label><input type="number" id="mst" value="200"></div>
+      <div class="fg"><label>Tags (comma separated)</label><input id="mtg" placeholder="web, production"></div>
+      <div class="fr">
+        <div class="fg"><label>Status</label><select id="mac"><option value="1">Enable</option><option value="0">Inactive</option></select></div>
+        <div class="fg"><label>Public</label><select id="mpb"><option value="1">Public</option><option value="0">Private</option></select></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn bo bs" onclick="closeMon()">Cancel</button><button class="btn bp bs" onclick="saveMon()">💾 Save</button></div>
+  </div>
+</div>
+<script>
+var tok=localStorage.getItem('m_tok')||'';
+var me=localStorage.getItem('m_me')||'';
+var pub=null,mons=[],importData=null;
+
+function login(){
+  fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('lu').value,password:document.getElementById('lp').value})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.error){document.getElementById('le').textContent=d.error;return;}
+    tok=d.token;me=d.username;
+    localStorage.setItem('m_tok',tok);localStorage.setItem('m_me',me);showApp();
+  });
+}
+function logout(){tok='';me='';localStorage.removeItem('m_tok');localStorage.removeItem('m_me');location.reload();}
+function api(u,o){
+  o=o||{};
+  var h={'Content-Type':'application/json','Authorization':'Bearer '+tok};
+  if(o.headers)Object.assign(h,o.headers);
+  return fetch(u,Object.assign({},o,{headers:h}));
+}
+function showApp(){
+  document.getElementById('lw').style.display='none';
+  document.getElementById('app').classList.add('on');
+  document.getElementById('un').textContent=me;
+  ref();loadSt();
+}
+function goP(n,el){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
+  var idMap={dash:'pgdash',mon:'pgmon',inc:'pginc',set:'pgset',tg:'pgtg',impexp:'pgImpexp'};
+  var pid=idMap[n]||('pg'+n);
+  document.getElementById(pid).classList.add('on');
+  el.classList.add('on');
+  if(n==='mon')loadM();
+  if(n==='inc')loadI();
+  if(n==='set')loadSt();
+  if(n==='tg')loadTg();
+}
+function swT(id,btn){
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  ['tg2','ts'].forEach(function(t){document.getElementById(t).classList.add('hide');});
+  document.getElementById(id).classList.remove('hide');
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtDate(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dlFile(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);}
+
+function ref(){
+  Promise.all([fetch('/api/public/stats'),api('/api/monitors')])
+  .then(function(rs){return Promise.all([rs[0].json(),rs[1].json()]);})
+  .then(function(ds){
+    pub=ds[0];mons=ds[1];
+    var s=pub.summary;
+    document.getElementById('sT').textContent=s.total;
+    document.getElementById('sU').textContent=s.up;
+    document.getElementById('sD').textContent=s.down;
+    document.getElementById('sA').textContent=s.overallUptime+'%';
+    document.getElementById('dtbl').innerHTML=pub.monitors.map(function(m){
+      var st=m.status===1?'up':m.status===0?'dn':'uk';
+      var uc=m.uptime24h>=99?'color:var(--em)':m.uptime24h>=95?'color:var(--amber)':'color:var(--rose)';
+      return '<tr><td><strong>'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td><span class="dot '+st+'"></span>'+(m.status===1?'Online':m.status===0?'Offline':'N/A')+'</td><td>'+m.latency+'ms</td><td style="'+uc+'">'+m.uptime24h+'%</td><td style="color:var(--tx3);font-size:.78rem">'+(m.checked_at?new Date(m.checked_at).toLocaleTimeString('th-TH'):'—')+'</td></tr>';
+    }).join('');
+  });
+}
+
+function loadM(){
+  api('/api/monitors').then(function(r){return r.json();}).then(function(ms){
+    mons=ms;
+    document.getElementById('mtbl').innerHTML=ms.map(function(m){
+      var pm=pub&&pub.monitors?pub.monitors.find(function(p){return p.id===m.id;}):null;
+      var st=pm?(pm.status===1?'up':pm.status===0?'dn':'uk'):'uk';
+      return '<tr><td><span style="font-size:1.1rem">'+(m.icon||'🖥️')+'</span> <strong style="color:#7dd3fc">'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td style="font-size:.78rem">'+esc(m.target)+'</td><td><span class="dot '+st+'"></span>'+(st==='up'?'Online':st==='dn'?'Offline':'N/A')+'</td><td>'+m.interval+'s</td><td>'+(m.public?'✅':'🔒')+'</td><td><div class="acts"><button class="btn bo bs" onclick="chk('+m.id+')">▶ Check</button><button class="btn bo bs" onclick="copyM('+m.id+')\">📋 Copy</button><button class="btn bo bs" onclick="editM('+m.id+')">✏️</button><button class="btn bd bs" onclick="delM('+m.id+')">🗑️</button></div></td></tr>';
+    }).join('');
+  });
+}
+
+function chk(id){
+  api('/api/monitors/'+id+'/check',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
+    alert('Result: '+(d.status?'Online':'Offline')+' | Latency: '+d.latency+'ms | '+d.message);
+    loadM();ref();
+  });
+}
+function delM(id){if(!confirm('Confirmลบ?'))return;api('/api/monitors/'+id,{method:'DELETE'}).then(function(){loadM();ref();});}
+
+function openAdd(e){if(e)e.stopPropagation();
+  document.getElementById('mt').textContent='Add Monitor';
+  ['mid','mpo','mtg','mn','mta','mico'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('mty').value='http';
+  document.getElementById('mit').value=60;
+  document.getElementById('mto2').value=10;
+  document.getElementById('mst').value=200;
+  document.getElementById('mac').value='1';
+  document.getElementById('mpb').value='1';
+  document.getElementById('micoPreview').textContent='🖥️';
+  document.querySelectorAll('.ico-pick').forEach(function(e){e.classList.remove('sel');});
+  tyC();document.getElementById('mov').classList.add('on');
+}
+function editM(id){
+  var m=mons.find(function(x){return x.id===id;});if(!m)return;
+  document.getElementById('mt').textContent='Edit Monitor';
+  document.getElementById('mid').value=m.id;
+  document.getElementById('mn').value=m.name;
+  document.getElementById('mty').value=m.type;
+  document.getElementById('mta').value=m.target;
+  document.getElementById('mpo').value=m.port||'';
+  document.getElementById('mit').value=m.interval;
+  document.getElementById('mto2').value=m.timeout;
+  document.getElementById('mst').value=m.expected_status||200;
+  document.getElementById('mtg').value=(m.tags||[]).join(', ');
+  document.getElementById('mac').value=m.active?'1':'0';
+  document.getElementById('mpb').value=m.public?'1':'0';
+  document.getElementById('mico').value=m.icon||'';
+  document.getElementById('micoPreview').textContent=m.icon||'🖥️';
+  document.querySelectorAll('.ico-pick').forEach(function(e){e.classList.remove('sel');});
+  tyC();document.getElementById('mov').classList.add('on');
+}
+function pickIco(el,ico){
+  document.getElementById('mico').value=ico;
+  document.getElementById('micoPreview').textContent=ico;
+  document.querySelectorAll('.ico-pick').forEach(function(e){e.classList.remove('sel');});
+  el.classList.add('sel');
+}
+function tyC(){
+  var t=document.getElementById('mty').value;
+  document.getElementById('pfg').style.display=t==='tcp'?'block':'none';
+  document.getElementById('sfg').style.display=(t==='http'||t==='https')?'block':'none';
+}
+function saveMon(){
+  var id=document.getElementById('mid').value;
+  var body={
+    name:document.getElementById('mn').value,
+    type:document.getElementById('mty').value,
+    target:document.getElementById('mta').value,
+    port:document.getElementById('mpo').value||null,
+    interval:parseInt(document.getElementById('mit').value)||60,
+    timeout:parseInt(document.getElementById('mto2').value)||10,
+    expected_status:parseInt(document.getElementById('mst').value)||200,
+    tags:document.getElementById('mtg').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
+    icon:document.getElementById('mico').value||'',
+    active:document.getElementById('mac').value==='1',
+    public:document.getElementById('mpb').value==='1'
+  };
+  if(!body.name||!body.target){alert('กรุณากรอกNameและ Target');return;}
+  var btn = document.querySelector('#mov .btn.bp');
+  if(btn){btn.textContent='&#9203; กำลังSave...';btn.disabled=true;}
+  api(id?'/api/monitors/'+id:'/api/monitors',{method:id?'PUT':'POST',body:JSON.stringify(body)})
+  .then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(){
+    closeMon();
+    setTimeout(function(){loadM();ref();}, 300);
+  })
+  .catch(function(e){
+    alert('Error: '+e.message);
+    if(btn){btn.textContent='💾 Save';btn.disabled=false;}
+  });
+}
+function closeMon(){document.getElementById('mov').classList.remove('on');}
+
+function loadI(){
+  fetch('/api/public/incidents').then(function(r){return r.json();}).then(function(incs){
+    var t=document.getElementById('itbl');
+    if(!incs.length){t.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--tx3);padding:1.5rem">No incidents</td></tr>';return;}
+    t.innerHTML=incs.map(function(inc){
+      var res=!!inc.resolved_at;
+      var dur=res?Math.round((new Date(inc.resolved_at)-new Date(inc.started_at))/60000)+' min':Math.round((Date.now()-new Date(inc.started_at))/60000)+' min';
+      return '<tr><td><strong>'+esc(inc.monitor_name)+'</strong></td><td style="font-size:.78rem">'+new Date(inc.started_at).toLocaleString('th-TH')+'</td><td style="font-size:.78rem">'+(inc.resolved_at?new Date(inc.resolved_at).toLocaleString('th-TH'):'—')+'</td><td>'+dur+'</td><td style="color:'+(res?'var(--em)':'var(--rose)')+'">'+( res?'Resolved':'Ongoing')+'</td></tr>';
+    }).join('');
+  });
+}
+
+function loadSt(){
+  api('/api/settings').then(function(r){return r.json();}).then(function(s){
+    document.getElementById('stT').value=s.site_title||'';
+    document.getElementById('stD').value=s.retention_days||30;
+    document.getElementById('stZ').value=s.timezone||'Asia/Bangkok';
+  });
+}
+function saveSt(){
+  api('/api/settings',{method:'PUT',body:JSON.stringify({site_title:document.getElementById('stT').value,retention_days:document.getElementById('stD').value,timezone:document.getElementById('stZ').value})})
+  .then(function(){alert('Saveเรียบร้อย');});
+}
+function chPw(){
+  var cur=document.getElementById('pc').value,nw=document.getElementById('pn').value,con=document.getElementById('pk').value;
+  var msg=document.getElementById('pm');
+  if(nw!==con){msg.style.color='var(--rose)';msg.textContent='Passwordไม่ตรงกัน';return;}
+  api('/api/auth/change-password',{method:'POST',body:JSON.stringify({current:cur,newPassword:nw})})
+  .then(function(r){return r.json();}).then(function(d){
+    msg.style.color=d.error?'var(--rose)':'var(--em)';
+    msg.textContent=d.error||'ChangePasswordสำเร็จ';
+  });
+}
+
+function loadTg(){
+  api('/api/settings').then(function(r){return r.json();}).then(function(s){
+    document.getElementById('tgEn').value=s.tg_enabled||'0';
+    document.getElementById('tgTok').value=s.tg_token||'';
+    document.getElementById('tgCid').value=s.tg_chat_id||'';
+    document.getElementById('tgDn').value=s.tg_notify_down||'1';
+    document.getElementById('tgRc').value=s.tg_notify_recover||'1';
+  });
+}
+function saveTg(){
+  api('/api/settings',{method:'PUT',body:JSON.stringify({tg_enabled:document.getElementById('tgEn').value,tg_token:document.getElementById('tgTok').value,tg_chat_id:document.getElementById('tgCid').value,tg_notify_down:document.getElementById('tgDn').value,tg_notify_recover:document.getElementById('tgRc').value})})
+  .then(function(){var msg=document.getElementById('tgMsg');msg.style.color='var(--em)';msg.textContent='Saveเรียบร้อย';setTimeout(function(){msg.textContent='';},3000);});
+}
+function testTg(){
+  var msg=document.getElementById('tgMsg');
+  msg.style.color='var(--sky)';msg.textContent='Sending...';
+  api('/api/telegram/test',{method:'POST',body:JSON.stringify({token:document.getElementById('tgTok').value,chat_id:document.getElementById('tgCid').value})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.ok){msg.style.color='var(--em)';msg.textContent='Sent successfully!';}
+    else{msg.style.color='var(--rose)';msg.textContent='Error: '+d.error;}
+  });
+}
+
+function loadAdminMonitors(){return api('/api/monitors').then(function(r){return r.json();});}
+
+function adminExportJSON(){
+  var msg=document.getElementById('expMsg');
+  msg.style.color='var(--sky)';msg.textContent='Exporting...';
+  loadAdminMonitors().then(function(ms){
+    var data={exportedAt:new Date().toISOString(),exportedBy:'MaeSuai Cloud Monitor Admin',version:'1.0',monitors:ms.map(function(m){return{name:m.name,type:m.type,target:m.target,port:m.port||null,interval:m.interval||60,timeout:m.timeout||10,expected_status:m.expected_status||200,tags:m.tags||[],icon:m.icon||'',active:!!m.active,public:!!m.public};})};
+    dlFile(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'maeSuai-monitors-'+fmtDate()+'.json');
+    msg.style.color='var(--em)';msg.textContent='Exported JSON - '+ms.length+' items';
+    setTimeout(function(){msg.textContent='';},4000);
+  });
+}
+function adminExportCSV(){
+  var msg=document.getElementById('expMsg');
+  msg.style.color='var(--sky)';msg.textContent='Exporting...';
+  loadAdminMonitors().then(function(ms){
+    var rows=[['Name','Type','Target','Port','Interval','Timeout','Tags','Active','Public']];
+    ms.forEach(function(m){rows.push([m.name,m.type.toUpperCase(),m.target,m.port||'',m.interval,m.timeout,(m.tags||[]).join(';'),m.active?'Yes':'No',m.public?'Yes':'No']);});
+    var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+    dlFile(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}),'maeSuai-monitors-'+fmtDate()+'.csv');
+    msg.style.color='var(--em)';msg.textContent='Exported CSV - '+ms.length+' items';
+    setTimeout(function(){msg.textContent='';},4000);
+  });
+}
+function adminExportHTML(){
+  var msg=document.getElementById('expMsg');
+  msg.style.color='var(--sky)';msg.textContent='Exporting...';
+  loadAdminMonitors().then(function(ms){
+    var rows=ms.map(function(m){return '<tr><td>'+(m.icon||'')+'</td><td>'+esc(m.name)+'</td><td>'+m.type.toUpperCase()+'</td><td>'+esc(m.target)+'</td><td>'+m.interval+'s</td><td>'+(m.active?'Yes':'No')+'</td></tr>';}).join('');
+    var rpt='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MaeSuai Export</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.5rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;font-size:.75rem;text-transform:uppercase;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor</h1><p style="color:#94a3b8">'+new Date().toLocaleString('th-TH')+' | '+ms.length+' items</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Interval</th><th>Active</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>';
+    dlFile(new Blob([rpt],{type:'text/html;charset=utf-8'}),'maeSuai-list-'+fmtDate()+'.html');
+    msg.style.color='var(--em)';msg.textContent='Exported HTML';
+    setTimeout(function(){msg.textContent='';},4000);
+  });
+}
+function adminPrint(){
+  loadAdminMonitors().then(function(ms){
+    var w=window.open('','_blank');
+    w.document.write('<html><head><title>MaeSuai Monitor List</title><style>body{font-family:sans-serif;margin:2rem}table{width:100%;border-collapse:collapse}th,td{padding:.5rem;border:1px solid #ddd}th{background:#f1f5f9}</style></head><body><h2>MaeSuai Cloud Monitor</h2><p>'+new Date().toLocaleString('th-TH')+'</p><table><tr><th>Name</th><th>Type</th><th>Target</th><th>Interval</th><th>Active</th></tr>');
+    ms.forEach(function(m){w.document.write('<tr><td>'+esc(m.name)+'</td><td>'+m.type.toUpperCase()+'</td><td>'+esc(m.target)+'</td><td>'+m.interval+'s</td><td>'+(m.active?'Yes':'No')+'</td></tr>');});
+    w.document.write('</table></body></html>');w.document.close();w.print();
+  });
+}
+function adminPreviewImport(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data.monitors||!Array.isArray(data.monitors)){document.getElementById('impResult').innerHTML='<span style="color:var(--rose)">Invalid file format</span>';return;}
+      importData=data;
+      document.getElementById('impPreviewBody').innerHTML=data.monitors.slice(0,8).map(function(m){return'<tr><td style="padding:.3rem">'+(m.icon||'')+'</td><td style="padding:.3rem;color:#7dd3fc">'+esc(m.name)+'</td><td style="padding:.3rem"><span class="chip">'+m.type.toUpperCase()+'</span></td><td style="padding:.3rem;font-size:.78rem">'+esc(m.target)+'</td><td style="padding:.3rem;color:'+(m.active?'var(--em)':'var(--rose)')+'">'+( m.active?'Yes':'No')+'</td></tr>';}).join('')+(data.monitors.length>8?'<tr><td colspan="5" style="text-align:center;color:var(--tx3)">...+'+( data.monitors.length-8)+' items</td></tr>':'');
+      document.getElementById('impCount').textContent='Found '+data.monitors.length+' items';
+      document.getElementById('impPreview').style.display='block';
+      document.getElementById('impResult').innerHTML='';
+    }catch(err){document.getElementById('impResult').innerHTML='<span style="color:var(--rose)">Error: '+err.message+'</span>';}
+  };
+  reader.readAsText(file);
+}
+function adminDoImport(){
+  if(!importData||!importData.monitors)return;
+  var res=document.getElementById('impResult');
+  res.innerHTML='<span style="color:var(--sky)">Importing...</span>';
+  var ok=0,fail=0;
+  var chain=Promise.resolve();
+  importData.monitors.forEach(function(m){
+    chain=chain.then(function(){
+      return api('/api/monitors',{method:'POST',body:JSON.stringify({name:m.name,type:m.type,target:m.target,port:m.port||null,interval:m.interval||60,timeout:m.timeout||10,expected_status:m.expected_status||200,tags:m.tags||[],icon:m.icon||'',active:m.active!==false,public:m.public!==false})})
+      .then(function(r){if(r.ok)ok++;else fail++;})
+      .catch(function(){fail++;});
+    });
+  });
+  chain.then(function(){
+    res.innerHTML='<span style="color:var(--em)">Imported '+ok+' items'+(fail>0?' | Failed '+fail+' items':'')+'</span>';
+    cancelImport();ref();
+  });
+}
+
+function copyM(id){
+  var m = mons.find(function(x){return x.id===id;});
+  if(!m) return;
+  document.getElementById('mt').textContent = 'Add Monitor (Copy จาก '+m.name+')';
+  document.getElementById('mid').value = '';
+  document.getElementById('mn').value = m.name + ' (Copy)';
+  document.getElementById('mty').value = m.type;
+  document.getElementById('mta').value = m.target;
+  document.getElementById('mpo').value = m.port || '';
+  document.getElementById('mit').value = m.interval;
+  document.getElementById('mto2').value = m.timeout;
+  document.getElementById('mst').value = m.expected_status || 200;
+  document.getElementById('mtg').value = (m.tags||[]).join(', ');
+  document.getElementById('mac').value = m.active ? '1' : '0';
+  document.getElementById('mpb').value = m.public ? '1' : '0';
+  document.getElementById('mico').value = m.icon || '';
+  document.getElementById('micoPreview').textContent = m.icon || '🖥️';
+  document.querySelectorAll('.ico-pick').forEach(function(e){e.classList.remove('sel');});
+  tyC();
+  document.getElementById('mov').classList.add('on');
+}
+
+function cancelImport(){
+  importData=null;
+  document.getElementById('impPreview').style.display='none';
+  document.getElementById('adminImpFile').value='';
+  document.getElementById('impCount').textContent='';
+}
+
+document.getElementById('mov').addEventListener('click',function(e){
+  e.stopPropagation();
+});
+if(tok)showApp();
+setInterval(ref,30000);
+</script>
+</body>
+</html>
