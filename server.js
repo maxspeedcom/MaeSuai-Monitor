@@ -21,6 +21,7 @@ function runMigrations(){
   const migrations = [
     "ALTER TABLE monitors ADD COLUMN icon TEXT DEFAULT '🖥️'",
     "ALTER TABLE monitors ADD COLUMN tags TEXT DEFAULT '[]'",
+    "ALTER TABLE monitors ADD COLUMN sort_order INTEGER DEFAULT 0",
   ];
   migrations.forEach(function(sql){
     try{ db.prepare(sql).run(); }catch(e){}
@@ -87,11 +88,25 @@ function initScheduler(){const ms=db.prepare('SELECT * FROM monitors WHERE activ
 app.post('/api/auth/login',(req,res)=>{const u=db.prepare('SELECT * FROM users WHERE username=?').get(req.body.username);if(!u||!bcrypt.compareSync(req.body.password,u.password))return res.status(401).json({error:'Invalid credentials'});res.json({token:jwt.sign({id:u.id,username:u.username},JWT_SECRET,{expiresIn:'7d'}),username:u.username});});
 app.post('/api/auth/change-password',auth,(req,res)=>{const u=db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);if(!bcrypt.compareSync(req.body.current,u.password))return res.status(400).json({error:'Wrong password'});db.prepare('UPDATE users SET password=? WHERE id=?').run(bcrypt.hashSync(req.body.newPassword,10),req.user.id);res.json({ok:true});});
 function uptime(id,hours){const tot=db.prepare(`SELECT COUNT(*) n FROM heartbeats WHERE monitor_id=? AND checked_at>datetime('now','-'||?||' hours')`).get(id,hours);const up=db.prepare(`SELECT COUNT(*) n FROM heartbeats WHERE monitor_id=? AND status=1 AND checked_at>datetime('now','-'||?||' hours')`).get(id,hours);return tot.n?+((up.n/tot.n)*100).toFixed(2):100;}
-app.get('/api/public/stats',(req,res)=>{const monitors=db.prepare('SELECT * FROM monitors WHERE public=1').all().map(m=>{const last=db.prepare('SELECT * FROM heartbeats WHERE monitor_id=? ORDER BY checked_at DESC LIMIT 1').get(m.id);const avg=db.prepare(`SELECT AVG(latency) a FROM heartbeats WHERE monitor_id=? AND checked_at>datetime('now','-1 hours')`).get(m.id);const inc=db.prepare('SELECT id FROM incidents WHERE monitor_id=? AND resolved_at IS NULL').get(m.id);return{id:m.id,name:m.name,type:m.type,target:m.target,tags:JSON.parse(m.tags||'[]'),icon:m.icon||"🖥️",status:last?.status??-1,latency:last?.latency??0,message:last?.message??'',checked_at:last?.checked_at,avgLatency:Math.round(avg?.a||0),uptime24h:uptime(m.id,24),uptime7d:uptime(m.id,168),uptime30d:uptime(m.id,720),hasIncident:!!inc};});const up=monitors.filter(m=>m.status===1).length,down=monitors.filter(m=>m.status===0).length,avg=monitors.length?(monitors.reduce((s,m)=>s+m.uptime24h,0)/monitors.length).toFixed(2):100;res.json({monitors,summary:{total:monitors.length,up,down,overallUptime:avg}});});
+app.get('/api/public/stats',(req,res)=>{const monitors=db.prepare('SELECT * FROM monitors WHERE public=1 ORDER BY sort_order ASC, id ASC').all().map(m=>{const last=db.prepare('SELECT * FROM heartbeats WHERE monitor_id=? ORDER BY checked_at DESC LIMIT 1').get(m.id);const avg=db.prepare(`SELECT AVG(latency) a FROM heartbeats WHERE monitor_id=? AND checked_at>datetime('now','-1 hours')`).get(m.id);const inc=db.prepare('SELECT id FROM incidents WHERE monitor_id=? AND resolved_at IS NULL').get(m.id);return{id:m.id,name:m.name,type:m.type,target:m.target,tags:JSON.parse(m.tags||'[]'),icon:m.icon||"🖥️",status:last?.status??-1,latency:last?.latency??0,message:last?.message??'',checked_at:last?.checked_at,avgLatency:Math.round(avg?.a||0),uptime24h:uptime(m.id,24),uptime7d:uptime(m.id,168),uptime30d:uptime(m.id,720),hasIncident:!!inc};});const up=monitors.filter(m=>m.status===1).length,down=monitors.filter(m=>m.status===0).length,avg=monitors.length?(monitors.reduce((s,m)=>s+m.uptime24h,0)/monitors.length).toFixed(2):100;res.json({monitors,summary:{total:monitors.length,up,down,overallUptime:avg}});});
 app.get('/api/public/monitors/:id/heartbeats',(req,res)=>{if(!db.prepare('SELECT id FROM monitors WHERE id=? AND public=1').get(req.params.id))return res.status(404).json({error:'Not found'});const h=parseInt(req.query.hours||24);res.json(db.prepare(`SELECT status,latency,message,checked_at FROM heartbeats WHERE monitor_id=? AND checked_at>datetime('now','-'||?||' hours') ORDER BY checked_at ASC`).all(req.params.id, h));});
 app.get('/api/public/incidents',(req,res)=>{res.json(db.prepare('SELECT i.*,m.name monitor_name FROM incidents i JOIN monitors m ON i.monitor_id=m.id WHERE m.public=1 ORDER BY i.started_at DESC LIMIT 30').all());});
-app.get('/api/monitors',auth,(req,res)=>{res.json(db.prepare('SELECT * FROM monitors ORDER BY id').all().map(m=>({...m,tags:JSON.parse(m.tags||'[]')})));});
+app.get('/api/monitors',auth,(req,res)=>{res.json(db.prepare('SELECT * FROM monitors ORDER BY sort_order ASC, id ASC').all().map(m=>({...m,tags:JSON.parse(m.tags||'[]')})));});
 app.post('/api/monitors',auth,(req,res)=>{const b=req.body,r=db.prepare('INSERT INTO monitors(name,type,target,port,interval,timeout,expected_status,tags,active,public,icon) VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(b.name,b.type,b.target,b.port||null,b.interval||60,b.timeout||10,b.expected_status||200,JSON.stringify(b.tags||[]),b.active?1:0,b.public?1:0,b.icon||"🖥️");const m=db.prepare('SELECT * FROM monitors WHERE id=?').get(r.lastInsertRowid);schedule(m);setTimeout(()=>runCheck(m),300);res.json({...m,tags:JSON.parse(m.tags||'[]')});});
+
+app.post('/api/monitors/reorder',auth,(req,res)=>{
+  try{
+    const {id1,id2}=req.body;
+    const m1=db.prepare('SELECT sort_order FROM monitors WHERE id=?').get(id1);
+    const m2=db.prepare('SELECT sort_order FROM monitors WHERE id=?').get(id2);
+    const o1=m1?m1.sort_order:id1;
+    const o2=m2?m2.sort_order:id2;
+    db.prepare('UPDATE monitors SET sort_order=? WHERE id=?').run(o2,id1);
+    db.prepare('UPDATE monitors SET sort_order=? WHERE id=?').run(o1,id2);
+    res.json({ok:true});
+  }catch(e){res.status(500).json({error:e.message});}
+});
+
 app.put('/api/monitors/:id',auth,(req,res)=>{const b=req.body;db.prepare('UPDATE monitors SET name=?,type=?,target=?,port=?,interval=?,timeout=?,expected_status=?,tags=?,active=?,public=?,icon=? WHERE id=?').run(b.name,b.type,b.target,b.port||null,b.interval||60,b.timeout||10,b.expected_status||200,JSON.stringify(b.tags||[]),b.active?1:0,b.public?1:0,b.icon||"🖥️",req.params.id);const m=db.prepare('SELECT * FROM monitors WHERE id=?').get(req.params.id);schedule(m);res.json({...m,tags:JSON.parse(m.tags||'[]')});});
 app.delete('/api/monitors/:id',auth,(req,res)=>{const id=parseInt(req.params.id);if(jobs.has(id)){jobs.get(id).stop();jobs.delete(id);}db.prepare('DELETE FROM monitors WHERE id=?').run(id);res.json({ok:true});});
 app.post('/api/monitors/:id/check',auth,async(req,res)=>{const m=db.prepare('SELECT * FROM monitors WHERE id=?').get(req.params.id);if(!m)return res.status(404).json({error:'Not found'});res.json(await runCheck(m));});

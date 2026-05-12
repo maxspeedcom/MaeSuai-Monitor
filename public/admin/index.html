@@ -347,11 +347,21 @@ function loadM(){
     document.getElementById('mtbl').innerHTML=ms.map(function(m){
       var pm=pub&&pub.monitors?pub.monitors.find(function(p){return p.id===m.id;}):null;
       var st=pm?(pm.status===1?'up':pm.status===0?'dn':'uk'):'uk';
-      return '<tr><td><span style="font-size:1.1rem">'+(m.icon||'🖥️')+'</span> <strong style="color:#7dd3fc">'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td style="font-size:.78rem">'+esc(m.target)+'</td><td><span class="dot '+st+'"></span>'+(st==='up'?'Online':st==='dn'?'Offline':'N/A')+'</td><td>'+m.interval+'s</td><td>'+(m.public?'✅':'🔒')+'</td><td><div class="acts"><button class="btn bo bs" onclick="chk('+m.id+')">▶ Check</button><button class="btn bo bs" onclick="copyM('+m.id+')">📋 Copy</button><button class="btn bo bs" onclick="editM('+m.id+')">✏️</button><button class="btn bd bs" onclick="delM('+m.id+')">🗑️</button></div></td></tr>';
+      return '<tr><td><span style="font-size:1.1rem">'+(m.icon||'🖥️')+'</span> <strong style="color:#7dd3fc">'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td style="font-size:.78rem">'+esc(m.target)+'</td><td><span class="dot '+st+'"></span>'+(st==='up'?'Online':st==='dn'?'Offline':'N/A')+'</td><td>'+m.interval+'s</td><td>'+(m.public?'✅':'🔒')+'</td><td><div class="acts"><button class="btn bo bs" onclick="moveUp('+m.id+')">&#8593;</button><button class="btn bo bs" onclick="moveDown('+m.id+')">&#8595;</button><button class="btn bo bs" onclick="chk('+m.id+')">&#9654;</button><button class="btn bo bs" onclick="copyM('+m.id+')">📋 Copy</button><button class="btn bo bs" onclick="editM('+m.id+')">✏️</button><button class="btn bd bs" onclick="delM('+m.id+')">🗑️</button></div></td></tr>';
     }).join('');
   });
 }
 
+function moveUp(id){
+  var idx=mons.findIndex(function(x){return x.id===id;});
+  if(idx<=0)return;
+  api('/api/monitors/reorder',{method:'POST',body:JSON.stringify({id1:mons[idx].id,id2:mons[idx-1].id})}).then(function(){loadM();});
+}
+function moveDown(id){
+  var idx=mons.findIndex(function(x){return x.id===id;});
+  if(idx<0||idx>=mons.length-1)return;
+  api('/api/monitors/reorder',{method:'POST',body:JSON.stringify({id1:mons[idx].id,id2:mons[idx+1].id})}).then(function(){loadM();});
+}
 function chk(id){
   api('/api/monitors/'+id+'/check',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
     alert('Result: '+(d.status?'Online':'Offline')+' | Latency: '+d.latency+'ms | '+d.message);
