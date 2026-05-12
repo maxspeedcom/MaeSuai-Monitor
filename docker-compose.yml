@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  maeSuai-monitor:
+    build: .
+    container_name: maeSuai-monitor
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Bangkok
+      - NODE_ENV=production

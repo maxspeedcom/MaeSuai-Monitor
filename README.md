@@ -1,50 +1,87 @@
 # MaeSuai Cloud Monitor
 
-Network uptime monitoring system - Uptime Kuma style
+Network uptime monitoring system built with Node.js + SQLite + Socket.IO
 
 ## Features
-- HTTP/HTTPS/PING/TCP monitoring
+- HTTP / HTTPS / PING / TCP monitoring
 - Real-time dashboard with WebSocket
 - Telegram notifications
-- Import/Export monitors
-- Galaxy animated background
+- Import / Export monitors
 - Incident tracking
+- Galaxy animated background
 
-## Quick Install (Ubuntu/Debian)
+---
+
+## Installation Method 1 — Standard (Ubuntu/Debian)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/maeSuai-monitor.git
-cd maeSuai-monitor
+apt-get install -y git curl
+git clone https://github.com/maxspeedcom/MaeSuai-Monitor.git
+cd MaeSuai-Monitor
 chmod +x install.sh
-sudo bash install.sh
+bash install.sh
 ```
 
-## Manual Install
+---
 
+## Installation Method 2 — Docker
+
+### Requirements
+- Docker
+- Docker Compose
+
+### Install Docker (if not installed)
 ```bash
-# Install Node.js 20
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
-sudo apt-get install -y nodejs iputils-ping
-
-# Install dependencies
-cd /opt/maeSuai-monitor
-npm install --omit=dev
-
-# Start service
-sudo systemctl enable --now maeSuai-monitor
+curl -fsSL https://get.docker.com | sh
 ```
+
+### Run with Docker Compose
+```bash
+git clone https://github.com/maxspeedcom/MaeSuai-Monitor.git
+cd MaeSuai-Monitor
+docker compose up -d --build
+```
+
+### Useful Docker commands
+```bash
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+
+# Restart
+docker compose restart
+
+# Update
+git pull
+docker compose up -d --build
+```
+
+---
 
 ## Access
-- Public: `http://YOUR_IP:3000`
-- Admin: `http://YOUR_IP:3000/admin`
-- Default login: `admin` / `admin1234`
+| URL | Description |
+|-----|-------------|
+| `http://YOUR_IP:3000` | Public Status Page |
+| `http://YOUR_IP:3000/admin` | Admin Dashboard |
 
-## Requirements
+## Default Login
+- **Username:** admin
+- **Password:** admin1234
+
+> ⚠️ Please change password after first login: Admin → Settings → Password
+
+---
+
+## Requirements (Standard)
 - Ubuntu 20.04+ / Debian 11+
 - Node.js 20+
 - RAM: 512MB+
 - Disk: 1GB+
 
-## Change Password
-Login to Admin → Settings → Password
-# MaeSuai-Monitor
+## Requirements (Docker)
+- Docker 20+
+- Docker Compose v2+
+- RAM: 512MB+
+- Disk: 1GB+
