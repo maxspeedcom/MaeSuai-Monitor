@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MaeSuai Cloud Monitor</title>
+<title>MaeSuai Cloud Monitor V.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -116,7 +116,7 @@ footer a{color:var(--sky);text-decoration:none;}
 <canvas id="cv"></canvas>
 <div class="nw" id="nw"></div>
 <div id="ldr">
-  <div style="font-size:1.2rem;font-weight:700;color:var(--sky)">MaeSuai Cloud Monitor</div>
+  <div style="font-size:1.2rem;font-weight:700;color:var(--sky)">MaeSuai Cloud Monitor V.2</div>
   <div class="spin"></div>
   <div style="font-size:.8rem;color:var(--tx3)">Loading system data...</div>
 </div>
@@ -124,7 +124,7 @@ footer a{color:var(--sky);text-decoration:none;}
   <div class="hdr">
     <div class="logo">
       <div class="lm">M</div>
-      <div class="lt"><strong>MaeSuai Cloud Monitor</strong><span>Network Uptime Monitoring</span></div>
+      <div class="lt"><strong>MaeSuai Cloud Monitor V.2</strong><span>Network Uptime Monitoring</span></div>
     </div>
     <div class="hr">
       <div class="live"><div class="ld"></div>LIVE</div>
@@ -151,7 +151,7 @@ footer a{color:var(--sky);text-decoration:none;}
   <div class="incl" id="incl"><p style="color:var(--tx3)">No incidents recorded</p></div>
 </main>
 <footer>
-  <p><strong>MaeSuai Cloud Monitor</strong></p>
+  <p><strong>MaeSuai Cloud Monitor V.2</strong></p>
   <p style="margin-top:.3rem;font-size:.72rem">MaeSuai System | <a href="https://www.maesuaisystem.com" target="_blank">www.maesuaisystem.com</a> | <a href="/admin">Admin</a></p>
   <p style="margin-top:.3rem;font-size:.7rem">Updated: <span id="lu">-</span></p>
 </footer>
@@ -439,12 +439,12 @@ function doCSV(){
 function doHTML(){
   if(!all)return;
   var r=all.monitors.map(function(m){return"<tr><td>"+(m.icon||"")+"</td><td>"+esc(m.name)+"</td><td>"+m.type+"</td><td>"+esc(m.target)+"</td><td style='color:"+(m.status===1?"#34d399":"#f87171")+"'>"+(m.status===1?"Online":"Offline")+"</td><td>"+m.latency+"ms</td><td>"+m.uptime24h+"%</td></tr>";}).join("");
-  dl(new Blob(["<!DOCTYPE html><html><head><meta charset='UTF-8'><title>MaeSuai Report</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.6rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor</h1><p style='color:#94a3b8'>"+new Date().toLocaleString("th-TH")+"</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Latency</th><th>Uptime 24h</th></tr></thead><tbody>"+r+"</tbody></table></body></html>"],{type:"text/html"}),"maeSuai-"+fd()+".html");
+  dl(new Blob(["<!DOCTYPE html><html><head><meta charset='UTF-8'><title>MaeSuai Report</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.6rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor V.2</h1><p style='color:#94a3b8'>"+new Date().toLocaleString("th-TH")+"</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Latency</th><th>Uptime 24h</th></tr></thead><tbody>"+r+"</tbody></table></body></html>"],{type:"text/html"}),"maeSuai-"+fd()+".html");
 }
 function doPrint(){
   if(!all)return;
   var w=window.open("","_blank");
-  w.document.write("<html><head><title>MaeSuai</title></head><body><h2>MaeSuai Cloud Monitor</h2><p>"+new Date().toLocaleString("th-TH")+"</p><table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'><tr><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Uptime 24h</th></tr>");
+  w.document.write("<html><head><title>MaeSuai</title></head><body><h2>MaeSuai Cloud Monitor V.2</h2><p>"+new Date().toLocaleString("th-TH")+"</p><table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'><tr><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Uptime 24h</th></tr>");
   all.monitors.forEach(function(m){w.document.write("<tr><td>"+m.name+"</td><td>"+m.type+"</td><td>"+m.target+"</td><td>"+(m.status===1?"Online":"Offline")+"</td><td>"+m.uptime24h+"%</td></tr>");});
   w.document.write("</table></body></html>");w.document.close();w.print();
 }
