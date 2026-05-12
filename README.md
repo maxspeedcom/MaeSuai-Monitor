@@ -47,3 +47,4 @@ sudo systemctl enable --now maeSuai-monitor
 
 ## Change Password
 Login to Admin → Settings → Password
+# MaeSuai-Monitor
