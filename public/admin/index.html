@@ -145,7 +145,7 @@ tr:hover td{background:rgba(56,189,248,.02);}
       <div class="tabs"><button class="tab on" onclick="swT('tg2',this)">General</button><button class="tab" onclick="swT('ts',this)">Password</button></div>
       <div id="tg2">
         <div class="card"><h3>Configuration</h3>
-          <div class="fg"><label>Nameเว็บไซต์</label><input id="stT"></div>
+          <div class="fg"><label>Site Title</label><input id="stT"></div>
           <div class="fg"><label>Retention (days)</label><input type="number" id="stD" min="7" max="365"></div>
           <div class="fg"><label>Timezone</label><select id="stZ"><option value="Asia/Bangkok">Asia/Bangkok (UTC+7)</option><option value="UTC">UTC</option></select></div>
           <button class="btn bp bs" onclick="saveSt()">💾 Save</button>
@@ -153,8 +153,8 @@ tr:hover td{background:rgba(56,189,248,.02);}
       </div>
       <div id="ts" class="hide">
         <div class="card"><h3>ChangePassword</h3>
-          <div class="fg"><label>Passwordปัจจุบัน</label><input type="password" id="pc"></div>
-          <div class="fg"><label>Passwordใหม่</label><input type="password" id="pn"></div>
+          <div class="fg"><label>Current Password</label><input type="password" id="pc"></div>
+          <div class="fg"><label>New Password</label><input type="password" id="pn"></div>
           <div class="fg"><label>Confirm</label><input type="password" id="pk"></div>
           <button class="btn bp bs" onclick="chPw()">🔐 Change</button>
           <div id="pm" style="margin-top:.6rem;font-size:.82rem;"></div>
