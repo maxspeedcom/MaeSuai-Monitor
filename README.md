@@ -25,6 +25,9 @@ Network uptime monitoring system built with Node.js + SQLite + Socket.IO
 ### Telegram Notifications
 ![Telegram](screenshots/telegram.png)
 
+### Telegram Settings
+![Telegram Settings](screenshots/telegram-settings.png)
+
 ### Import / Export
 ![Import Export](screenshots/import-export.png)
 
