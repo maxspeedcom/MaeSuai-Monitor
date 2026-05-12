@@ -69,7 +69,7 @@ async function notifyDown(monitor, message) {
   const notifyDown = db.prepare('SELECT value FROM settings WHERE key=?').get('tg_notify_down')?.value||'1';
   if (notifyDown !== '1') return;
   const ico = monitor.icon || '🖥️';
-  const msg = `🔴 <b>แจ้งเตือน: บริการล่ม!</b>\n\n${ico} <b>${monitor.name}</b>\n📡 ประเภท: ${monitor.type.toUpperCase()}\n🎯 Target: <code>${monitor.target}</code>\n❌ สาเหตุ: ${message}\n🕐 เวลา: ${new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok'})}`;
+  const msg = `🔴 <b>Notifyเตือน: Service Down!</b>\n\n${ico} <b>${monitor.name}</b>\n📡 ประเภท: ${monitor.type.toUpperCase()}\n🎯 Target: <code>${monitor.target}</code>\n❌ สาเหตุ: ${message}\n🕐 เวลา: ${new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok'})}`;
   await sendTelegram(msg);
 }
 
@@ -77,7 +77,7 @@ async function notifyRecover(monitor) {
   const notifyRec = db.prepare('SELECT value FROM settings WHERE key=?').get('tg_notify_recover')?.value||'1';
   if (notifyRec !== '1') return;
   const ico = monitor.icon || '🖥️';
-  const msg = `✅ <b>บริการกลับมาปกติ!</b>\n\n${ico} <b>${monitor.name}</b>\n📡 ประเภท: ${monitor.type.toUpperCase()}\n🎯 Target: <code>${monitor.target}</code>\n🕐 เวลา: ${new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok'})}`;
+  const msg = `✅ <b>Service Recovered!</b>\n\n${ico} <b>${monitor.name}</b>\n📡 ประเภท: ${monitor.type.toUpperCase()}\n🎯 Target: <code>${monitor.target}</code>\n🕐 เวลา: ${new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok'})}`;
   await sendTelegram(msg);
 }
 
