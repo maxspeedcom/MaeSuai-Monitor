@@ -420,7 +420,7 @@ function saveMon(){
   };
   if(!body.name||!body.target){alert('กรุณากรอกNameและ Target');return;}
   var btn = document.querySelector('#mov .btn.bp');
-  if(btn){btn.textContent='&#9203; กำลังSave...';btn.disabled=true;}
+  if(btn){btn.textContent='&#9203; Saving...';btn.disabled=true;}
   api(id?'/api/monitors/'+id:'/api/monitors',{method:id?'PUT':'POST',body:JSON.stringify(body)})
   .then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
