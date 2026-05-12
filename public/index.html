@@ -298,7 +298,7 @@ function loadBars(id){
     beats.slice(-N).forEach(function(x,i){bars[N-Math.min(beats.length,N)+i]=x;});
     c.innerHTML=bars.map(function(x){
       if(!x)return "<div class='hb em' style='height:10px'></div>";
-      var h=Math.min(60,Math.max(10,(x.latency/6)||15));
+      var h=x.status?40:6;
       return "<div class='hb "+(x.status?"up":"dn")+"' style='height:"+h+"px'></div>";
     }).join("");
   }).catch(function(){});
