@@ -11,16 +11,12 @@ db.pragma('journal_mode=WAL');
 ].forEach(function(sql){try{db.prepare(sql).run();}catch(e){}});
 
 
-// Auto Migration
-['ALTER TABLE monitors ADD COLUMN icon TEXT DEFAULT "🖥️"',
- 'ALTER TABLE monitors ADD COLUMN tags TEXT DEFAULT "[]"',
-].forEach(function(sql){try{db.prepare(sql).run();}catch(e){}});
 
 
-// Auto Migration
-['ALTER TABLE monitors ADD COLUMN icon TEXT DEFAULT "🖥️"',
- 'ALTER TABLE monitors ADD COLUMN tags TEXT DEFAULT "[]"',
-].forEach(function(sql){try{db.prepare(sql).run();}catch(e){}});
+
+
+
+
 
 db.exec(`CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT UNIQUE NOT NULL,password TEXT NOT NULL,created_at DATETIME DEFAULT CURRENT_TIMESTAMP);CREATE TABLE IF NOT EXISTS monitors(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,type TEXT NOT NULL,target TEXT NOT NULL,port INTEGER,interval INTEGER DEFAULT 60,timeout INTEGER DEFAULT 10,expected_status INTEGER DEFAULT 200,tags TEXT DEFAULT '[]',active INTEGER DEFAULT 1,public INTEGER DEFAULT 1,created_at DATETIME DEFAULT CURRENT_TIMESTAMP);CREATE TABLE IF NOT EXISTS heartbeats(id INTEGER PRIMARY KEY AUTOINCREMENT,monitor_id INTEGER NOT NULL,status INTEGER NOT NULL,latency INTEGER,message TEXT,checked_at DATETIME DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(monitor_id) REFERENCES monitors(id) ON DELETE CASCADE);CREATE TABLE IF NOT EXISTS incidents(id INTEGER PRIMARY KEY AUTOINCREMENT,monitor_id INTEGER NOT NULL,started_at DATETIME NOT NULL,resolved_at DATETIME,message TEXT,FOREIGN KEY(monitor_id) REFERENCES monitors(id) ON DELETE CASCADE);CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT);CREATE INDEX IF NOT EXISTS idx_hb ON heartbeats(monitor_id,checked_at);`);
 if(!db.prepare('SELECT id FROM users WHERE username=?').get('admin')){db.prepare('INSERT INTO users(username,password) VALUES(?,?)').run('admin',bcrypt.hashSync('admin1234',10));console.log('✅ Admin: admin / admin1234');}
