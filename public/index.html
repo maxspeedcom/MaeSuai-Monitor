@@ -29,7 +29,7 @@ header{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);b
 .hero h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:700;margin-bottom:.5rem;}
 .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--sky),var(--em));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero p{color:#f97316;font-size:1.14rem;margin-bottom:2rem;}
-.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem;}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.75rem;}
 .sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;text-align:center;backdrop-filter:blur(12px);}
 .sc .lb{font-size:.68rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
 .sc .vl{font-size:2rem;font-weight:600;}
@@ -39,7 +39,7 @@ header{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);b
 .warn{background:rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.22);color:var(--rose);}
 .sh{display:flex;align-items:center;gap:.6rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#f97316;font-weight:600;margin-bottom:1rem;}
 .sh::before{content:"";width:3px;height:14px;background:#f97316;border-radius:2px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin-bottom:2.5rem;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(306px,1fr));gap:1rem;margin-bottom:2.5rem;}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;backdrop-filter:blur(12px);cursor:pointer;transition:all .25s;}
 .mc:hover{border-color:rgba(56,189,248,.22);transform:translateY(-3px);}
 .mc.sup{border-left:3px solid var(--em2);}.mc.sdn{border-left:3px solid var(--ro2);}.mc.suk{border-left:3px solid var(--tx3);}
@@ -202,7 +202,7 @@ function showN(type,name,icon,msg){
   var el=document.createElement("div");
   el.className="notif "+type;el.id=id;
   var ico=type==="down"?"🔴":"✅";
-  var title=type==="down"?"Service Down!":"Service Recovered";
+  var title=type==="down"?"Service Down!":"Service Up!";
   var now=new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
   el.innerHTML="<span class='ni-ico'>"+(icon&&icon.trim()?icon:ico)+"</span>"+
     "<div class='ni-body'><div class='ni-title'>"+ico+" "+title+"</div>"+
