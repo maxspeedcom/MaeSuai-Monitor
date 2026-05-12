@@ -166,15 +166,15 @@ tr:hover td{background:rgba(56,189,248,.02);}
       <div class="card">
         <div style="background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.15);border-radius:10px;padding:1rem;margin-bottom:1.25rem;font-size:.85rem;line-height:1.8;color:var(--tx2)">
           1. เInactive Telegram ค้นหา @BotFather<br>
-          2. พิมพ์ /newbot ตั้งName Bot<br>
-          3. คัดลอก Bot Token ใส่ด้านล่าง<br>
-          4. เพิ่ม Bot เข้า Group หา Chat ID ด้วย @userinfobot
+          2. Type /newbot and set bot name<br>
+          3. Copy Bot Token and paste below<br>
+          4. Add Bot to Group, get Chat ID via @userinfobot
         </div>
         <div class="fg"><label>Enable</label><select id="tgEn"><option value="1">เInactive</option><option value="0">Inactive</option></select></div>
         <div class="fg"><label>Bot Token</label><input id="tgTok" placeholder="1234567890:ABCdef..."></div>
         <div class="fg"><label>Chat ID</label><input id="tgCid" placeholder="-1001234567890"></div>
-        <div class="fg"><label>Notify on Down</label><select id="tgDn"><option value="1">แจ้ง</option><option value="0">ไม่แจ้ง</option></select></div>
-        <div class="fg"><label>Notify on Recovery</label><select id="tgRc"><option value="1">แจ้ง</option><option value="0">ไม่แจ้ง</option></select></div>
+        <div class="fg"><label>Notify on Down</label><select id="tgDn"><option value="1">Notify</option><option value="0">ไม่Notify</option></select></div>
+        <div class="fg"><label>Notify on Recovery</label><select id="tgRc"><option value="1">Notify</option><option value="0">ไม่Notify</option></select></div>
         <div style="display:flex;gap:.75rem;">
           <button class="btn bp bs" onclick="saveTg()">💾 Save</button>
           <button class="btn bo bs" onclick="testTg()">📨 Test</button>
@@ -186,7 +186,7 @@ tr:hover td{background:rgba(56,189,248,.02);}
       <div class="pgh"><h2>📋 Import / Export</h2></div>
       <div class="card" style="margin-bottom:1.25rem;">
         <h3>📥 Export Monitors</h3>
-        <p style="font-size:.82rem;color:var(--tx2);margin-bottom:1rem;">Export items Monitor Totalเป็นไฟล์สำรอง</p>
+        <p style="font-size:.82rem;color:var(--tx2);margin-bottom:1rem;">Export all monitors to a backup file</p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
           <button class="btn bp bs" onclick="adminExportJSON()">📄 Export JSON</button>
           <button class="btn bp bs" onclick="adminExportCSV()">📊 Export CSV</button>

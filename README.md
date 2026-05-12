@@ -2,6 +2,8 @@
 
 Network uptime monitoring system built with Node.js + SQLite + Socket.IO
 
+![Public Page](screenshots/public-page.png)
+
 ## Features
 - HTTP / HTTPS / PING / TCP monitoring
 - Real-time dashboard with WebSocket
@@ -9,6 +11,22 @@ Network uptime monitoring system built with Node.js + SQLite + Socket.IO
 - Import / Export monitors
 - Incident tracking
 - Galaxy animated background
+
+---
+
+## Screenshots
+
+### Public Status Page
+![Public Page](screenshots/public-page.png)
+
+### Add Monitor
+![Add Monitor](screenshots/add-monitor.png)
+
+### Telegram Notifications
+![Telegram](screenshots/telegram.png)
+
+### Import / Export
+![Import Export](screenshots/import-export.png)
 
 ---
 
@@ -26,36 +44,24 @@ bash install.sh
 
 ## Installation Method 2 — Docker
 
-### Requirements
-- Docker
-- Docker Compose
-
-### Install Docker (if not installed)
+### Install Docker
 ```bash
 curl -fsSL https://get.docker.com | sh
 ```
 
-### Run with Docker Compose
+### Run
 ```bash
 git clone https://github.com/maxspeedcom/MaeSuai-Monitor.git
 cd MaeSuai-Monitor
 docker compose up -d --build
 ```
 
-### Useful Docker commands
+### Docker commands
 ```bash
-# View logs
-docker compose logs -f
-
-# Stop
-docker compose down
-
-# Restart
-docker compose restart
-
-# Update
-git pull
-docker compose up -d --build
+docker compose logs -f    # View logs
+docker compose down       # Stop
+docker compose restart    # Restart
+git pull && docker compose up -d --build  # Update
 ```
 
 ---
@@ -70,18 +76,14 @@ docker compose up -d --build
 - **Username:** admin
 - **Password:** admin1234
 
-> ⚠️ Please change password after first login: Admin → Settings → Password
+> ⚠️ Please change password after first login
 
 ---
 
-## Requirements (Standard)
-- Ubuntu 20.04+ / Debian 11+
-- Node.js 20+
-- RAM: 512MB+
-- Disk: 1GB+
-
-## Requirements (Docker)
-- Docker 20+
-- Docker Compose v2+
-- RAM: 512MB+
-- Disk: 1GB+
+## Requirements
+| | Standard | Docker |
+|--|---------|--------|
+| OS | Ubuntu 20.04+ / Debian 11+ | Any |
+| Runtime | Node.js 20+ | Docker 20+ |
+| RAM | 512MB+ | 512MB+ |
+| Disk | 1GB+ | 1GB+ |
