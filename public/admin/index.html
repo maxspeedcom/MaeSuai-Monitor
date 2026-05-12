@@ -347,7 +347,7 @@ function loadM(){
     document.getElementById('mtbl').innerHTML=ms.map(function(m){
       var pm=pub&&pub.monitors?pub.monitors.find(function(p){return p.id===m.id;}):null;
       var st=pm?(pm.status===1?'up':pm.status===0?'dn':'uk'):'uk';
-      return '<tr><td><span style="font-size:1.1rem">'+(m.icon||'🖥️')+'</span> <strong style="color:#7dd3fc">'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td style="font-size:.78rem">'+esc(m.target)+'</td><td><span class="dot '+st+'"></span>'+(st==='up'?'Online':st==='dn'?'Offline':'N/A')+'</td><td>'+m.interval+'s</td><td>'+(m.public?'✅':'🔒')+'</td><td><div class="acts"><button class="btn bo bs" onclick="chk('+m.id+')">▶ Check</button><button class="btn bo bs" onclick="copyM('+m.id+')\">📋 Copy</button><button class="btn bo bs" onclick="editM('+m.id+')">✏️</button><button class="btn bd bs" onclick="delM('+m.id+')">🗑️</button></div></td></tr>';
+      return '<tr><td><span style="font-size:1.1rem">'+(m.icon||'🖥️')+'</span> <strong style="color:#7dd3fc">'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td style="font-size:.78rem">'+esc(m.target)+'</td><td><span class="dot '+st+'"></span>'+(st==='up'?'Online':st==='dn'?'Offline':'N/A')+'</td><td>'+m.interval+'s</td><td>'+(m.public?'✅':'🔒')+'</td><td><div class="acts"><button class="btn bo bs" onclick="chk('+m.id+')">▶ Check</button><button class="btn bo bs" onclick="copyM('+m.id+')">📋 Copy</button><button class="btn bo bs" onclick="editM('+m.id+')">✏️</button><button class="btn bd bs" onclick="delM('+m.id+')">🗑️</button></div></td></tr>';
     }).join('');
   });
 }
