@@ -39,7 +39,7 @@ header{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);b
 .warn{background:rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.22);color:var(--rose);}
 .sh{display:flex;align-items:center;gap:.6rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#f97316;font-weight:600;margin-bottom:1rem;}
 .sh::before{content:"";width:3px;height:14px;background:#f97316;border-radius:2px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(306px,1fr));gap:1rem;margin-bottom:2.5rem;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2.5rem;}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.05rem .09rem;backdrop-filter:blur(12px);cursor:pointer;transition:all .25s;}
 .mc:hover{border-color:rgba(56,189,248,.22);transform:translateY(-3px);}
 .mc.sup{border-left:3px solid var(--em2);}.mc.sdn{border-left:3px solid var(--ro2);}.mc.suk{border-left:3px solid var(--tx3);}
@@ -57,10 +57,10 @@ header{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);b
 .mmeta{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;}
 .mtype{font-size:.62rem;font-weight:600;padding:.12rem .45rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.18);color:var(--sky);border-radius:4px;text-transform:uppercase;}
 .mtgt{font-size:.9rem;color:#fbbf24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800;}
-.hbb{display:flex;align-items:flex-end;gap:2px;height:80px;margin-bottom:.75rem;}
-.hb{flex:1;border-radius:2px;min-height:4px;}
+.hbb{display:flex;align-items:flex-end;gap:2px;height:60px;margin-bottom:.75rem;overflow:hidden;}
+.hb{flex:1;border-radius:2px;min-height:4px;min-width:0;}
 .hb.up{background:var(--em2);opacity:.75;}.hb.dn{background:var(--ro2);opacity:.9;}.hb.em{background:rgba(255,255,255,.06);}
-.mst{display:flex;justify-content:space-between;}
+.mst{display:flex;justify-content:space-between;padding:0 .6rem;}
 .sv{font-size:.85rem;font-weight:600;color:var(--tx);}
 .sv.g{color:var(--em);}.sv.r{color:var(--rose);}.sv.y{color:var(--amber);}
 .su{font-size:.62rem;color:var(--tx3);margin-top:.15rem;}
@@ -278,7 +278,7 @@ function mkCard(m){
       "<span class='mname'>"+(m.icon?m.icon+" ":"")+esc(m.name)+"</span>"+
     "</div><span class='badge "+st+"'>"+stT+"</span></div>"+
     "<div class='mmeta'><span class='mtype'>"+m.type.toUpperCase()+"</span><span class='mtgt'>"+esc(m.target)+"</span></div>"+
-    "<div class='hbb' id='b"+m.id+"'>"+Array(60).fill("<div class='hb em' style='height:10px'></div>").join("")+"</div>"+
+    "<div class='hbb' id='b"+m.id+"'>"+Array(90).fill("<div class='hb em' style='height:10px'></div>").join("")+"</div>"+
     "<div class='mst'>"+
       "<div><div class='sv "+uc+"'>"+m.uptime24h+"%</div><div class='su'>24h</div></div>"+
       "<div><div class='sv "+uc+"'>"+m.uptime7d+"%</div><div class='su'>7d</div></div>"+
@@ -294,11 +294,11 @@ function loadBars(id){
   .then(function(beats){
     var c=document.getElementById("b"+id);
     if(!c||!beats.length)return;
-    var N=60,bars=Array(N).fill(null);
+    var N=90,bars=Array(N).fill(null);
     beats.slice(-N).forEach(function(x,i){bars[N-Math.min(beats.length,N)+i]=x;});
     c.innerHTML=bars.map(function(x){
       if(!x)return "<div class='hb em' style='height:10px'></div>";
-      var h=Math.min(80,Math.max(10,(x.latency/5)||16));
+      var h=Math.min(60,Math.max(10,(x.latency/6)||15));
       return "<div class='hb "+(x.status?"up":"dn")+"' style='height:"+h+"px'></div>";
     }).join("");
   }).catch(function(){});
