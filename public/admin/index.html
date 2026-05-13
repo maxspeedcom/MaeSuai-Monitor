@@ -453,7 +453,7 @@ function loadI(){
     if(!incs.length){t.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--tx3);padding:1.5rem">No incidents</td></tr>';return;}
     t.innerHTML=incs.map(function(inc){
       var res=!!inc.resolved_at;
-      var dur=res?Math.round((new Date(inc.resolved_at)-new Date(inc.started_at))/60000)+' min':Math.round((Date.now()-new Date(inc.started_at))/60000)+' min';
+      var dur=res?Math.round((toLocal(inc.resolved_at)-toLocal(inc.started_at))/60000)+' min':Math.round((Date.now()-new Date(inc.started_at))/60000)+' min';
       return '<tr><td><strong>'+esc(inc.monitor_name)+'</strong></td><td style="font-size:.78rem">'+toLocal(inc.started_at).toLocaleString('th-TH')+'</td><td style="font-size:.78rem">'+(inc.resolved_at?toLocal(inc.resolved_at).toLocaleString('th-TH'):'—')+'</td><td>'+dur+'</td><td style="color:'+(res?'var(--em)':'var(--rose)')+'">'+( res?'Resolved':'Ongoing')+'</td></tr>';
     }).join('');
   });
@@ -533,7 +533,7 @@ function adminExportHTML(){
   msg.style.color='var(--sky)';msg.textContent='Exporting...';
   loadAdminMonitors().then(function(ms){
     var rows=ms.map(function(m){return '<tr><td>'+(m.icon||'')+'</td><td>'+esc(m.name)+'</td><td>'+m.type.toUpperCase()+'</td><td>'+esc(m.target)+'</td><td>'+m.interval+'s</td><td>'+(m.active?'Yes':'No')+'</td></tr>';}).join('');
-    var rpt='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MaeSuai Export</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.5rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;font-size:.75rem;text-transform:uppercase;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor V.2</h1><p style="color:#94a3b8">'+new Date().toLocaleString('th-TH')+' | '+ms.length+' items</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Interval</th><th>Active</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>';
+    var rpt='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MaeSuai Export</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.5rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;font-size:.75rem;text-transform:uppercase;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor V.2</h1><p style="color:#94a3b8">'+new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})+' | '+ms.length+' items</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Interval</th><th>Active</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>';
     dlFile(new Blob([rpt],{type:'text/html;charset=utf-8'}),'maeSuai-list-'+fmtDate()+'.html');
     msg.style.color='var(--em)';msg.textContent='Exported HTML';
     setTimeout(function(){msg.textContent='';},4000);
@@ -542,7 +542,7 @@ function adminExportHTML(){
 function adminPrint(){
   loadAdminMonitors().then(function(ms){
     var w=window.open('','_blank');
-    w.document.write('<html><head><title>MaeSuai Monitor List</title><style>body{font-family:sans-serif;margin:2rem}table{width:100%;border-collapse:collapse}th,td{padding:.5rem;border:1px solid #ddd}th{background:#f1f5f9}</style></head><body><h2>MaeSuai Cloud Monitor V.2</h2><p>'+new Date().toLocaleString('th-TH')+'</p><table><tr><th>Name</th><th>Type</th><th>Target</th><th>Interval</th><th>Active</th></tr>');
+    w.document.write('<html><head><title>MaeSuai Monitor List</title><style>body{font-family:sans-serif;margin:2rem}table{width:100%;border-collapse:collapse}th,td{padding:.5rem;border:1px solid #ddd}th{background:#f1f5f9}</style></head><body><h2>MaeSuai Cloud Monitor V.2</h2><p>'+new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})+'</p><table><tr><th>Name</th><th>Type</th><th>Target</th><th>Interval</th><th>Active</th></tr>');
     ms.forEach(function(m){w.document.write('<tr><td>'+esc(m.name)+'</td><td>'+m.type.toUpperCase()+'</td><td>'+esc(m.target)+'</td><td>'+m.interval+'s</td><td>'+(m.active?'Yes':'No')+'</td></tr>');});
     w.document.write('</table></body></html>');w.document.close();w.print();
   });

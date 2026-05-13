@@ -160,13 +160,13 @@ footer a{color:var(--sky);text-decoration:none;}
     <div class="mhdr"><h3 id="mt">-</h3><button class="mcls" onclick="closeMd()">X</button></div>
     <div class="mbdy">
       <div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.75rem;">
-        <button class="trb on" onclick="sr(60,this)">1h</button>
-        <button class="trb" onclick="sr(180,this)">3h</button>
-        <button class="trb" onclick="sr(720,this)">12h</button>
-        <button class="trb" onclick="sr(1440,this)">24h</button>
-        <button class="trb" onclick="sr(4320,this)">3d</button>
-        <button class="trb" onclick="sr(10080,this)">7d</button>
-        <button class="trb" onclick="sr(43200,this)">30d</button>
+        <button class="trb" onclick="sr(1,this)">1h</button>
+        <button class="trb" onclick="sr(3,this)">3h</button>
+        <button class="trb" onclick="sr(12,this)">12h</button>
+        <button class="trb on" onclick="sr(24,this)">24h</button>
+        <button class="trb" onclick="sr(72,this)">3d</button>
+        <button class="trb" onclick="sr(168,this)">7d</button>
+        <button class="trb" onclick="sr(720,this)">30d</button>
       </div>
       <div class="cwrap"><canvas id="ch"></canvas></div>
       <div class="dgrid" id="md"></div>
@@ -188,7 +188,7 @@ footer a{color:var(--sky);text-decoration:none;}
   </div>
 </div>
 <script>
-var sock=io(),all=null,ci=null,curId=null,curR=1,prevSt={};
+var sock=io(),all=null,ci=null,curId=null,curR=24,prevSt={};
 var lastRefresh=0,refreshPaused=false;
 
 function toLocal(dt){return new Date(dt.indexOf('T')<0?dt.replace(' ','T')+'Z':dt);}
@@ -349,7 +349,7 @@ function loadChart(id,h){
     if(ci)ci.destroy();
     var rec=beats.slice(-100);
     ci=new Chart(ctx,{type:"bar",data:{
-      labels:rec.map(function(b){return new Date(b.checked_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});}),
+      labels:rec.map(function(b){return toLocal(b.checked_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});}),
       datasets:[{label:"ms",data:rec.map(function(b){return b.latency||0;}),
         backgroundColor:rec.map(function(b){return b.status?"rgba(52,211,153,.7)":"rgba(251,113,133,.8)";}),
         borderRadius:2,borderSkipped:false}]
@@ -447,12 +447,12 @@ function doCSV(){
 function doHTML(){
   if(!all)return;
   var r=all.monitors.map(function(m){return"<tr><td>"+(m.icon||"")+"</td><td>"+esc(m.name)+"</td><td>"+m.type+"</td><td>"+esc(m.target)+"</td><td style='color:"+(m.status===1?"#34d399":"#f87171")+"'>"+(m.status===1?"Online":"Offline")+"</td><td>"+m.latency+"ms</td><td>"+m.uptime24h+"%</td></tr>";}).join("");
-  dl(new Blob(["<!DOCTYPE html><html><head><meta charset='UTF-8'><title>MaeSuai Report</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.6rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor V.2</h1><p style='color:#94a3b8'>"+new Date().toLocaleString("th-TH")+"</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Latency</th><th>Uptime 24h</th></tr></thead><tbody>"+r+"</tbody></table></body></html>"],{type:"text/html"}),"maeSuai-"+fd()+".html");
+  dl(new Blob(["<!DOCTYPE html><html><head><meta charset='UTF-8'><title>MaeSuai Report</title><style>body{font-family:sans-serif;margin:2rem;background:#030712;color:#e2e8f0}h1{color:#38bdf8}table{width:100%;border-collapse:collapse}th,td{padding:.6rem 1rem;border-bottom:1px solid #1e3a5f;text-align:left}th{background:#0e1a35;color:#64748b}</style></head><body><h1>MaeSuai Cloud Monitor V.2</h1><p style='color:#94a3b8'>"+new Date().toLocaleString("th-TH",{timeZone:"Asia/Bangkok"})+"</p><table><thead><tr><th>Icon</th><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Latency</th><th>Uptime 24h</th></tr></thead><tbody>"+r+"</tbody></table></body></html>"],{type:"text/html"}),"maeSuai-"+fd()+".html");
 }
 function doPrint(){
   if(!all)return;
   var w=window.open("","_blank");
-  w.document.write("<html><head><title>MaeSuai</title></head><body><h2>MaeSuai Cloud Monitor V.2</h2><p>"+new Date().toLocaleString("th-TH")+"</p><table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'><tr><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Uptime 24h</th></tr>");
+  w.document.write("<html><head><title>MaeSuai</title></head><body><h2>MaeSuai Cloud Monitor V.2</h2><p>"+new Date().toLocaleString("th-TH",{timeZone:"Asia/Bangkok"})+"</p><table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'><tr><th>Name</th><th>Type</th><th>Target</th><th>Status</th><th>Uptime 24h</th></tr>");
   all.monitors.forEach(function(m){w.document.write("<tr><td>"+m.name+"</td><td>"+m.type+"</td><td>"+m.target+"</td><td>"+(m.status===1?"Online":"Offline")+"</td><td>"+m.uptime24h+"%</td></tr>");});
   w.document.write("</table></body></html>");w.document.close();w.print();
 }

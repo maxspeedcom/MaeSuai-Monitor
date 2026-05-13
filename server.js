@@ -40,13 +40,13 @@ async function runCheck(m){let r;try{if(m.type==='ping')r=await checkPing(m);els
 db.prepare('INSERT INTO heartbeats(monitor_id,status,latency,message) VALUES(?,?,?,?)').run(m.id,r.status,r.latency,r.message);
 const open=db.prepare('SELECT id FROM incidents WHERE monitor_id=? AND resolved_at IS NULL').get(m.id);
 if(r.status===0&&!open){
-  db.prepare("INSERT INTO incidents(monitor_id,started_at,message) VALUES(?,datetime('now'),?)").run(m.id,r.message);
+  db.prepare("INSERT INTO incidents(monitor_id,started_at,message) VALUES(?,datetime('now','+7 hours'),?)").run(m.id,r.message);
 }else if(r.status===1&&open){
-  db.prepare("UPDATE incidents SET resolved_at=datetime('now') WHERE id=?").run(open.id);
+  db.prepare("UPDATE incidents SET resolved_at=datetime('now','+7 hours') WHERE id=?").run(open.id);
 }
 const days=parseInt(db.prepare('SELECT value FROM settings WHERE key=?').get('retention_days')?.value||30);
 db.prepare("DELETE FROM heartbeats WHERE monitor_id=? AND checked_at < datetime('now', ? || ' days')").run(m.id, '-'+days);
-io.emit('heartbeat',{monitor_id:m.id,...r,checked_at:new Date().toISOString()});return r;}
+const now=new Date();const localTime=new Date(now.getTime()+7*3600000).toISOString().replace('T',' ').substring(0,19);io.emit('heartbeat',{monitor_id:m.id,...r,checked_at:localTime});return r;}
 
 // ── Telegram Notification ─────────────────────────────────
 async function sendTelegram(message) {
