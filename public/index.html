@@ -87,7 +87,7 @@ footer a{color:var(--sky);text-decoration:none;}
 .mbdy{padding:1.5rem;}
 .trb{padding:.3rem .65rem;border-radius:7px;border:1px solid rgba(56,189,248,.2);background:rgba(56,189,248,.05);color:var(--tx2);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .18s;margin:.15rem;}
 .trb:hover,.trb.on{background:rgba(56,189,248,.18);color:var(--sky);border-color:var(--sky);}
-.cwrap{position:relative;height:150px;margin:1rem 0;}
+.cwrap{position:relative;height:160px;margin:1rem 0;min-height:160px;}
 .dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;}
 .dbox{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;}
 .dbox .dv{font-size:1.4rem;font-weight:600;}.dbox .dl{font-size:.65rem;color:var(--tx3);margin-top:.25rem;}
@@ -160,9 +160,9 @@ footer a{color:var(--sky);text-decoration:none;}
     <div class="mhdr"><h3 id="mt">-</h3><button class="mcls" onclick="closeMd()">X</button></div>
     <div class="mbdy">
       <div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.75rem;">
-        <button class="trb" onclick="sr(60,this)">1h</button>
+        <button class="trb on" onclick="sr(60,this)">1h</button>
         <button class="trb" onclick="sr(180,this)">3h</button>
-        <button class="trb on" onclick="sr(720,this)">12h</button>
+        <button class="trb" onclick="sr(720,this)">12h</button>
         <button class="trb" onclick="sr(1440,this)">24h</button>
         <button class="trb" onclick="sr(4320,this)">3d</button>
         <button class="trb" onclick="sr(10080,this)">7d</button>
@@ -188,9 +188,10 @@ footer a{color:var(--sky);text-decoration:none;}
   </div>
 </div>
 <script>
-var sock=io(),all=null,ci=null,curId=null,curR=720,prevSt={};
+var sock=io(),all=null,ci=null,curId=null,curR=1,prevSt={};
 var lastRefresh=0,refreshPaused=false;
 
+function toLocal(dt){return new Date(dt.indexOf('T')<0?dt.replace(' ','T')+'Z':dt);}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function ago(dt){var d=new Date(dt.indexOf("T")<0?dt.replace(" ","T")+"Z":dt);var s=Math.floor((Date.now()-d)/1000);if(s<60)return s+"s";if(s<3600)return Math.floor(s/60)+"m";if(s<86400)return Math.floor(s/3600)+"h";return Math.floor(s/86400)+"d";}
 function dl(blob,name){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();}
@@ -243,7 +244,7 @@ function load(){
     renderInc(ds[1]);
     chkSt(all.monitors);
     document.getElementById("ldr").classList.add("hide");
-    document.getElementById("lu").textContent=new Date().toLocaleString("th-TH");
+    document.getElementById("lu").textContent=new Date().toLocaleString("th-TH",{timeZone:"Asia/Bangkok"});
   }).catch(function(e){
     console.error("load error:",e);
     document.getElementById("ldr").classList.add("hide");
@@ -309,10 +310,10 @@ function renderInc(incs){
   if(!incs.length){el.innerHTML="<p style='color:var(--tx3)'>No incidents recorded</p>";return;}
   el.innerHTML=incs.slice(0,6).map(function(inc){
     var res=!!inc.resolved_at;
-    var sd=new Date(inc.started_at.indexOf('T')<0?inc.started_at.replace(' ','T')+'Z':inc.started_at);var rd=inc.resolved_at?new Date(inc.resolved_at.indexOf('T')<0?inc.resolved_at.replace(' ','T')+'Z':inc.resolved_at):null;var durMin=rd?Math.round((rd-sd)/60000):Math.round((Date.now()-sd)/60000);var dur=durMin<60?durMin+' min':Math.floor(durMin/60)+'h '+(durMin%60)+'min';
+    var sd=toLocal(inc.started_at);var rd=inc.resolved_at?toLocal(inc.resolved_at):null;var durMs=rd?(rd-sd):(Date.now()-sd);var durSec=Math.round(durMs/1000);var durMin=Math.floor(durSec/60);var dur=durSec<60?durSec+'s':durMin<60?durMin+' min':Math.floor(durMin/60)+'h '+(durMin%60)+'min';
     return "<div class='ini"+(res?" res":"")+"'>"+
       "<span>"+(res?"✅":"🔴")+"</span>"+
-      "<div class='iinfo'><div class='iname'>"+esc(inc.monitor_name)+"</div><div class='itime'>"+new Date(inc.started_at.indexOf('T')<0?inc.started_at.replace(' ','T')+'Z':inc.started_at).toLocaleString("th-TH")+" · "+dur+"</div></div>"+
+      "<div class='iinfo'><div class='iname'>"+esc(inc.monitor_name)+"</div><div class='itime'>"+toLocal(inc.started_at).toLocaleString("th-TH")+" · "+dur+"</div></div>"+
       "<span class='ipill "+(res?"res":"open")+"'>"+(res?"Up":"Down")+"</span>"+
     "</div>";
   }).join("");
@@ -408,10 +409,17 @@ function smartRefresh(){
     });
     all.summary=nd.summary;all.monitors=nd.monitors;
     renderInc(ds[1]);
-    document.getElementById("lu").textContent=new Date().toLocaleString("th-TH");
+    document.getElementById("lu").textContent=new Date().toLocaleString("th-TH",{timeZone:"Asia/Bangkok"});
   }).catch(function(){});
 }
 setInterval(smartRefresh,30000);
+// Auto refresh incidents every 30s
+setInterval(function(){
+  fetch('/api/public/incidents')
+  .then(function(r){return r.json();})
+  .then(function(incs){renderInc(incs);})
+  .catch(function(){});
+},30000);
 setInterval(function(){
   if(!all||!all.monitors)return;
   all.monitors.forEach(function(m){

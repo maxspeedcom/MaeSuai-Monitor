@@ -319,6 +319,7 @@ function swT(id,btn){
   ['tg2','ts'].forEach(function(t){document.getElementById(t).classList.add('hide');});
   document.getElementById(id).classList.remove('hide');
 }
+function toLocal(dt){return new Date(dt.indexOf('T')<0?dt.replace(' ','T')+'Z':dt);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtDate(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function dlFile(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);}
@@ -336,7 +337,7 @@ function ref(){
     document.getElementById('dtbl').innerHTML=pub.monitors.map(function(m){
       var st=m.status===1?'up':m.status===0?'dn':'uk';
       var uc=m.uptime24h>=99?'color:var(--em)':m.uptime24h>=95?'color:var(--amber)':'color:var(--rose)';
-      return '<tr><td><strong>'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td><span class="dot '+st+'"></span>'+(m.status===1?'Online':m.status===0?'Offline':'N/A')+'</td><td>'+m.latency+'ms</td><td style="'+uc+'">'+m.uptime24h+'%</td><td style="color:var(--tx3);font-size:.78rem">'+(m.checked_at?new Date(m.checked_at).toLocaleTimeString('th-TH'):'—')+'</td></tr>';
+      return '<tr><td><strong>'+esc(m.name)+'</strong></td><td><span class="chip">'+m.type.toUpperCase()+'</span></td><td><span class="dot '+st+'"></span>'+(m.status===1?'Online':m.status===0?'Offline':'N/A')+'</td><td>'+m.latency+'ms</td><td style="'+uc+'">'+m.uptime24h+'%</td><td style="color:var(--tx3);font-size:.78rem">'+(m.checked_at?toLocal(m.checked_at).toLocaleTimeString('th-TH'):'—')+'</td></tr>';
     }).join('');
   });
 }
@@ -368,7 +369,7 @@ function chk(id){
     loadM();ref();
   });
 }
-function delM(id){if(!confirm('Confirmลบ?'))return;api('/api/monitors/'+id,{method:'DELETE'}).then(function(){loadM();ref();});}
+function delM(id){if(!confirm('Confirm delete?'))return;api('/api/monitors/'+id,{method:'DELETE'}).then(function(){loadM();ref();});}
 
 function openAdd(e){if(e)e.stopPropagation();
   document.getElementById('mt').textContent='Add Monitor';
@@ -453,7 +454,7 @@ function loadI(){
     t.innerHTML=incs.map(function(inc){
       var res=!!inc.resolved_at;
       var dur=res?Math.round((new Date(inc.resolved_at)-new Date(inc.started_at))/60000)+' min':Math.round((Date.now()-new Date(inc.started_at))/60000)+' min';
-      return '<tr><td><strong>'+esc(inc.monitor_name)+'</strong></td><td style="font-size:.78rem">'+new Date(inc.started_at).toLocaleString('th-TH')+'</td><td style="font-size:.78rem">'+(inc.resolved_at?new Date(inc.resolved_at).toLocaleString('th-TH'):'—')+'</td><td>'+dur+'</td><td style="color:'+(res?'var(--em)':'var(--rose)')+'">'+( res?'Resolved':'Ongoing')+'</td></tr>';
+      return '<tr><td><strong>'+esc(inc.monitor_name)+'</strong></td><td style="font-size:.78rem">'+toLocal(inc.started_at).toLocaleString('th-TH')+'</td><td style="font-size:.78rem">'+(inc.resolved_at?toLocal(inc.resolved_at).toLocaleString('th-TH'):'—')+'</td><td>'+dur+'</td><td style="color:'+(res?'var(--em)':'var(--rose)')+'">'+( res?'Resolved':'Ongoing')+'</td></tr>';
     }).join('');
   });
 }

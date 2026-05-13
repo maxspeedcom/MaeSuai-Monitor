@@ -39,8 +39,11 @@ function checkTCP(m){return new Promise(resolve=>{const start=Date.now(),sock=ne
 async function runCheck(m){let r;try{if(m.type==='ping')r=await checkPing(m);else if(m.type==='tcp')r=await checkTCP(m);else r=await checkHTTP(m);}catch(e){r={status:0,latency:0,message:e.message};}
 db.prepare('INSERT INTO heartbeats(monitor_id,status,latency,message) VALUES(?,?,?,?)').run(m.id,r.status,r.latency,r.message);
 const open=db.prepare('SELECT id FROM incidents WHERE monitor_id=? AND resolved_at IS NULL').get(m.id);
-if(r.status===0&&!open)db.prepare("INSERT INTO incidents(monitor_id,started_at,message) VALUES(?,datetime('now'),?)").run(m.id,r.message);
-else if(r.status===1&&open)db.prepare(`UPDATE incidents SET resolved_at=datetime('now') WHERE id=?`).run(open.id);
+if(r.status===0&&!open){
+  db.prepare("INSERT INTO incidents(monitor_id,started_at,message) VALUES(?,datetime('now'),?)").run(m.id,r.message);
+}else if(r.status===1&&open){
+  db.prepare("UPDATE incidents SET resolved_at=datetime('now') WHERE id=?").run(open.id);
+}
 const days=parseInt(db.prepare('SELECT value FROM settings WHERE key=?').get('retention_days')?.value||30);
 db.prepare("DELETE FROM heartbeats WHERE monitor_id=? AND checked_at < datetime('now', ? || ' days')").run(m.id, '-'+days);
 io.emit('heartbeat',{monitor_id:m.id,...r,checked_at:new Date().toISOString()});return r;}
@@ -113,7 +116,7 @@ app.post('/api/monitors/reorder',auth,(req,res)=>{
 });
 
 app.put('/api/monitors/:id',auth,(req,res)=>{const b=req.body;db.prepare('UPDATE monitors SET name=?,type=?,target=?,port=?,interval=?,timeout=?,expected_status=?,tags=?,active=?,public=?,icon=? WHERE id=?').run(b.name,b.type,b.target,b.port||null,b.interval||60,b.timeout||10,b.expected_status||200,JSON.stringify(b.tags||[]),b.active?1:0,b.public?1:0,b.icon||"🖥️",req.params.id);const m=db.prepare('SELECT * FROM monitors WHERE id=?').get(req.params.id);schedule(m);res.json({...m,tags:JSON.parse(m.tags||'[]')});});
-app.delete('/api/monitors/:id',auth,(req,res)=>{const id=parseInt(req.params.id);if(jobs.has(id)){jobs.get(id).stop();jobs.delete(id);}db.prepare('DELETE FROM monitors WHERE id=?').run(id);res.json({ok:true});});
+app.delete('/api/monitors/:id',auth,(req,res)=>{const id=parseInt(req.params.id);if(jobs.has(id)){clearInterval(jobs.get(id));jobs.delete(id);}db.prepare('DELETE FROM monitors WHERE id=?').run(id);res.json({ok:true});});
 app.post('/api/monitors/:id/check',auth,async(req,res)=>{const m=db.prepare('SELECT * FROM monitors WHERE id=?').get(req.params.id);if(!m)return res.status(404).json({error:'Not found'});res.json(await runCheck(m));});
 app.get('/api/monitors/:id/heartbeats',auth,(req,res)=>{const h=parseFloat(req.query.hours||24);res.json(db.prepare(`SELECT * FROM heartbeats WHERE monitor_id=? AND checked_at>datetime('now','-'||?||' hours') ORDER BY checked_at DESC LIMIT 500`).all(req.params.id, h));});
 app.get('/api/settings',auth,(req,res)=>{const s={};db.prepare('SELECT * FROM settings').all().forEach(r=>s[r.key]=r.value);res.json(s);});
